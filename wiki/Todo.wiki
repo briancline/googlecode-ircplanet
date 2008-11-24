@@ -1,0 +1,12 @@
+#summary List of _possible_ features in future versions of ircPlanet's services.
+
+= Channel Service =
+* Require users to be an op in the channels they attempt to register
+* Add a way for administrators to disallow channel registrations matching certain words
+* Add a command for users to verify the authority of another user (CS administrator, helper, etc)
+* Add JOIN and PART commands (level 450)
+* Add ability to /invite CS to a registered channel if user's access is at least as high as JOIN requires
+
+
+= Account / Nickname Service =
+* Add a way for administrators to disallow nickname registrations matching certain words
