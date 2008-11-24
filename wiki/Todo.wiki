@@ -12,7 +12,7 @@ The below is a list of features and capabilities that are being _considered_ for
   * Add ability to /invite CS to a registered channel if user's access is at least as high as JOIN requires
   * Add AUTOTOPIC capability (automatically set the default topic every 30 mins when channel is active)
   * Add TOPICLOCK capability (automatically reset topic if changed or not set to default topic)
-  * Modify ACCESS command to allow admins to view all channels a user has access to ("access *** username")
+  * Modify ACCESS command to allow admins to view all channels a user has access to (i.e., `access * username`)
 
 
 === Account / Nickname Service ===
