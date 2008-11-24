@@ -1,5 +1,7 @@
-#summary List of _possible_ features in future versions of ircPlanet's services.
+#summary List of possible features in future versions of ircPlanet's services.
 
+== Services Todo ==
+The below is a list of features and capabilities that are being _considered_ for inclusion in future releases of each service. The presence of a feature in this list does not guarantee that it will ever be implemented in future releases.
 
 === Channel Service ===
   * Finish implementation of command reporting to the log channel
