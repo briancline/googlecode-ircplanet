@@ -27,3 +27,4 @@ The below is a list of features and capabilities that are being _considered_ for
   * Add channel g-lining capabilities (via IRCu facilities)
   * Add realname g-lining capabilities (via IRCu facilities)
   * Add a way for OS automatically set and enforce +s on channels matching certain words (i.e., sexually explicit names)
+  * Add a setting to create a fake user from which global messages will be sent (with the `broadcast` command)
