@@ -3,6 +3,10 @@
 == Services Todo ==
 The below is a list of features and capabilities that are being _considered_ for inclusion in future releases of each service. The presence of a feature in this list does not guarantee that it will ever be implemented in future releases.
 
+=== Core ===
+  * Modify all sprintf-style functions to use vsprintf instead of a horribly excessive and probably expensive eval()'ed sprintf call.
+
+
 === Channel Service ===
   * Finish implementation of command reporting to the log channel
   * Add a way for administrators to disallow channel registrations matching certain words
@@ -24,7 +28,5 @@ The below is a list of features and capabilities that are being _considered_ for
   * Add juping capabilities with IRCu's built-in juping capabilities
   * Add juping capabilities via old faux-server style juping
   * Add nick juping via faux-users
-  * Add channel g-lining capabilities (via IRCu facilities)
-  * Add realname g-lining capabilities (via IRCu facilities)
   * Add a way for OS automatically set and enforce +s on channels matching certain words (i.e., sexually explicit names)
   * Add a setting to create a fake user from which global messages will be sent (with the `broadcast` command)
