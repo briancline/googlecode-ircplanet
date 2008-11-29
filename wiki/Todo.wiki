@@ -20,11 +20,13 @@ The below is a list of features and capabilities that are being _considered_ for
 
 
 === Account / Nickname Service ===
+  * Add help for DROP.
   * Finish implementation of command reporting to the log channel
   * Add a way for administrators to disallow nickname registrations matching certain words
 
 
 === Operator Service ===
+  * Add help for ADDGCHAN, REMGCHAN, ADDGNAME, REMGNAME.
   * Add juping capabilities with IRCu's built-in juping capabilities
   * Add juping capabilities via old faux-server style juping
   * Add nick juping via faux-users
