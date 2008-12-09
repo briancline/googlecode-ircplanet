@@ -10,13 +10,11 @@ The below is a list of features and capabilities that are being _considered_ for
 === Channel Service ===
   * Finish implementation of command reporting to the log channel
   * Add a way for administrators to disallow channel registrations matching certain words
-  * Require users to be an op in the channels they attempt to register
   * Add a command for users to verify the authority of another user (CS administrator, helper, etc)
-  * Add JOIN and PART commands (level 450)
-  * Add ability to /invite CS to a registered channel if user's access is at least as high as JOIN requires
   * Add AUTOTOPIC capability (automatically set the default topic every 30 mins when channel is active)
   * Add TOPICLOCK capability (automatically reset topic if changed or not set to default topic)
   * Modify ACCESS command to allow admins to view all channels a user has access to (i.e., `access * username`)
+  * Add help for JOIN and PART
 
 
 === Account / Nickname Service ===
