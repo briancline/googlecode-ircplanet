@@ -9,18 +9,18 @@ The below is a list of features and capabilities that are being _considered_ for
 
 === Channel Service ===
   * Finish implementation of command reporting to the log channel
-  * Add a way for administrators to disallow channel registrations matching certain words
+  * Add SHOW command
   * Add a command for users to verify the authority of another user (CS administrator, helper, etc)
   * Add AUTOTOPIC capability (automatically set the default topic every 30 mins when channel is active)
   * Add TOPICLOCK capability (automatically reset topic if changed or not set to default topic)
   * Modify ACCESS command to allow admins to view all channels a user has access to (i.e., `access * username`)
-  * Add help for JOIN and PART
+  * Add help for JOIN, PART, ADDBAD, REMBAD
 
 
 === Account / Nickname Service ===
   * Add help for DROP.
+  * Add SHOW command.
   * Finish implementation of command reporting to the log channel
-  * Add a way for administrators to disallow nickname registrations matching certain words
 
 
 === Operator Service ===
