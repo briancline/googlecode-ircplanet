@@ -4,7 +4,9 @@
 The below is a list of features and capabilities that are being _considered_ for inclusion in future releases of each service. The presence of a feature in this list does not guarantee that it will ever be implemented in future releases.
 
 === Core ===
-
+  * Add better logging facilities and options (debug, info, warn, critical)
+  * Experiment with different event handler mechanisms
+  * Add custom printf flags
 
 
 === Channel Service ===
