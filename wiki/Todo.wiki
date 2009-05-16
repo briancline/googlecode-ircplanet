@@ -27,6 +27,7 @@ The below is a list of features and capabilities that are being _considered_ for
 
 === Operator Service ===
   * Add help for ADDGCHAN, REMGCHAN, ADDGNAME, REMGNAME, SHOW.
+  * Add DNSBL support for DroneBL, ProxyBL
   * Add juping capabilities with IRCu's built-in juping capabilities
   * Add juping capabilities via old faux-server style juping
   * Add nick juping via faux-users
