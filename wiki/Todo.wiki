@@ -32,3 +32,4 @@ The below is a list of features and capabilities that are being _considered_ for
   * Add nick juping via faux-users
   * Add a setting to create a fake user from which global messages will be sent (with the `broadcast` command)
   * Add a method for other services to request glines (like NS for fraudulent accounts, proxy scanner for compromised hosts, etc)
+  * Add a means through which services admin can maintain a table of bad IP addresses that will be automatically g-lined upon connection (for harvested proxy lists, etc)
