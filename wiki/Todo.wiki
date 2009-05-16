@@ -23,7 +23,7 @@ The below is a list of features and capabilities that are being _considered_ for
   * Add help for DROP.
   * Add SHOW command.
   * Finish implementation of command reporting to the log channel
-
+  * Add e-mail verification to REGISTER command
 
 === Operator Service ===
   * Add help for ADDGCHAN, REMGCHAN, ADDGNAME, REMGNAME, SHOW.
@@ -31,3 +31,4 @@ The below is a list of features and capabilities that are being _considered_ for
   * Add juping capabilities via old faux-server style juping
   * Add nick juping via faux-users
   * Add a setting to create a fake user from which global messages will be sent (with the `broadcast` command)
+  * Add a method for other services to request glines (like NS for fraudulent accounts, proxy scanner for compromised hosts, etc)
