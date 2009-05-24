@@ -10,6 +10,7 @@ The below is a list of features and capabilities that are being _considered_ for
 
 
 === Channel Service ===
+  * Implement user protection (deops, kicks, bans, etc)
   * Finish implementation of command reporting to the log channel
   * Add SHOW command
   * Add a command for users to verify the authority of another user (CS administrator, helper, etc)
@@ -24,6 +25,7 @@ The below is a list of features and capabilities that are being _considered_ for
   * Add SHOW command.
   * Finish implementation of command reporting to the log channel
   * Add e-mail verification to REGISTER command
+
 
 === Operator Service ===
   * Add help for ADDGCHAN, REMGCHAN, ADDGNAME, REMGNAME, SHOW.
