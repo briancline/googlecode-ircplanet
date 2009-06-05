@@ -5,7 +5,7 @@ The below is a list of features and capabilities that are being _considered_ for
 
 === Core ===
   * Experiment with different event handler mechanisms
-  * _This is not a complete list. See the list of all issues for this module at http://code.google.com/p/ircplanet/issues/list._
+  * _This is not a complete list. See the list of all issues for this module at http://code.google.com/p/ircplanet/issues/list. _
 
 
 === Channel Service ===
