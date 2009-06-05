@@ -5,22 +5,17 @@ The below is a list of features and capabilities that are being _considered_ for
 
 === Core ===
   * Experiment with different event handler mechanisms
+  * _This is not a complete list. See the list of all issues for this module at http://code.google.com/p/ircplanet/issues/list._
 
 
 === Channel Service ===
-  * Implement user protection (deops, kicks, bans, etc)
-  * Add SHOW command
-  * Add a command for users to verify the authority of another user (CS administrator, helper, etc)
-  * Add AUTOTOPIC capability (automatically set the default topic every 30 mins when channel is active)
-  * Add TOPICLOCK capability (automatically reset topic if changed or not set to default topic)
-  * Modify ACCESS command to allow admins to view all channels a user has access to (i.e., `access * username`)
   * Add help for JOIN, PART, ADDBAD, REMBAD
+  * _This is not a complete list. See the list of all issues for this module at http://code.google.com/p/ircplanet/issues/list._
 
 
 === Account / Nickname Service ===
   * Add help for DROP.
-  * Add SHOW command.
-  * Add e-mail verification to REGISTER command
+  * _This is not a complete list. See the list of all issues for this module at http://code.google.com/p/ircplanet/issues/list._
 
 
 === Operator Service ===
@@ -29,4 +24,4 @@ The below is a list of features and capabilities that are being _considered_ for
   * Add juping capabilities via old faux-server style juping
   * Add nick juping via faux-users
   * Add a setting to create a fake user from which global messages will be sent (with the `broadcast` command)
-  * Add a means through which services admin can maintain a table of bad IP addresses that will be automatically g-lined upon connection (for harvested proxy lists, etc)
+  * _This is not a complete list. See the list of all issues for this module at http://code.google.com/p/ircplanet/issues/list._
