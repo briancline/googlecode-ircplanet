@@ -45,7 +45,7 @@
 		$kick_reason = $reason;
 	}
 	
-	if( !preg_match('/[!@\.]/', $mask) )
+	if( !eregi('[!@\.]', $mask) )
 	{
 		if( ($tmp_user = $this->get_user_by_nick($mask)) )
 			$mask = $tmp_user->get_host_mask();
@@ -78,4 +78,4 @@
 	}
 	
 	
-
+?>

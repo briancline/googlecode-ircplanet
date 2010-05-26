@@ -1,2 +1,0 @@
-#!/bin/sh
-php ds.php 2>&1 1>ds.log &

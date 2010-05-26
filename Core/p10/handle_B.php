@@ -33,10 +33,8 @@
 	$chan_key = strtolower( $args[2] );
 	$modes = '';
 	$key = '';
-	$admin_pass = '';
-	$user_pass = '';
 	$limit = 0;
-	$has_banlist = $args[$num_args - 1][0] == '%';
+	$has_banlist = false;
 	$userlist_pos = 4;
 	$cleared_local_modes = false;
 
@@ -46,7 +44,6 @@
 	 * AE B #support 1105674755 +tnl 14 AEBFh,M[AAC:ov
 	 * AE B #opers 1100986985 +smtin M[AAD:o
 	 * AE B #coder-com 1113336997 +tn AEBFh:o,M[AAC :%*!*user@*.fucker.com
-	 * AE B #coder-com 1113336997 :%*!*more@*.bans.com
 	 * AE B #testchan 1131291938 +stinlk 69 w00t3rz AEBFo:o
 	 */
 	
@@ -56,14 +53,16 @@
 		$userlist_pos++;
 		$modes_pos = 4;
 		
-		if( preg_match('/l/', $args[$modes_pos]) )
-			$limit = $args[$userlist_pos++];
-		if( preg_match('/k/', $args[$modes_pos]) )
-			$key = $args[$userlist_pos++];
-		if( preg_match('/A/', $args[$modes_pos]) )
-			$admin_pass = $args[$userlist_pos++];
-		if( preg_match('/U/', $args[$modes_pos]) )
-			$user_pass = $args[$userlist_pos++];
+		if( eregi('l', $args[$modes_pos]) )
+		{
+			$userlist_pos++;
+			$limit = $args[$userlist_pos - 1];
+		}
+		if( eregi('k', $args[$modes_pos]) )
+		{
+			$userlist_pos++;
+			$key = $args[$userlist_pos - 1];
+		}
 		
 		$modes = $args[$modes_pos];
 	}
@@ -72,35 +71,31 @@
 	{
 		if( $ts < $chan->get_ts() )
 		{
+			debugf("%s ts is %d secs older than mine", $chan_key, ($chan->get_ts() - $ts));
 			$chan->clear_bans();
 			$chan->clear_modes();
 			$chan->clear_user_modes();
-
+			
 			$chan->set_name( $chan_name );
 			$chan->set_ts( $ts );
+			$chan->add_modes( $modes );
+			$chan->set_limit( $limit );
+			$chan->set_key( $key );
 			
 			$cleared_local_modes = true;
 		}
-		
-		$chan->add_modes( $modes );
-		$chan->set_limit( $limit );
-		$chan->set_key( $key );
-		$chan->set_admin_pass( $admin_pass );
-		$chan->set_user_pass( $user_pass );
 	}
 	else
 	{
 		$chan = $this->add_channel( $chan_name, $ts, $modes, $key, $limit );
-		$chan->set_admin_pass( $admin_pass );
-		$chan->set_user_pass( $user_pass );
 	}
 	
 	/**
-	 * ircu might not send a user list with a burst line (for instance, if it's
-	 * breaking up tons of bans across multiple lines), so account for that here.
+	 * ircu once sent me a burst line with no users during services testing, 
+	 * so handle it's retardation appropriately here...
 	 */
 	$userlist = array();
-	$has_userlist = ($userlist_pos < ($num_args - 1) || (!$has_banlist && $userlist_pos == ($num_args - 1)));
+	$has_userlist = $userlist_pos < $num_args;
 	if( $has_userlist )
 	{
 		$userlist = explode( ',', $args[$userlist_pos] );
@@ -117,7 +112,8 @@
 	}
 	
 	$banlist = array();
-	$banlist_pos = $num_args - 1;
+	$banlist_pos = $userlist_pos + 1;
+	$has_banlist = $banlist_pos < $num_args;
 	if( $has_banlist )
 	{
 		// skip the % character
@@ -131,4 +127,4 @@
 	$user_count = count( $userlist );
 	$ban_count = count( $banlist );
 
-
+?>

@@ -57,14 +57,6 @@
 					$channel->set_pending_autolimit( true );
 				}
 				
-				$clean_defmodes = $this->clean_modes( $channel->get_default_modes() );
-				if( $channel->get_default_modes() != $clean_defmodes )
-				{
-					debugf("Setting defmodes for %s from [%s] to [%s]", $channel->get_name(), $channel->get_default_modes(), $clean_defmodes );
-					$channel->set_default_modes( $clean_defmodes );
-					$channel->save();
-				}
-				
 				$this->db_channels[$channel_key] = $channel;
 			}
 			
@@ -181,7 +173,6 @@
 					}
 					
 					$chan = $this->add_channel( $dbchan->get_name(), $ts );
-					$chan->add_mode( CMODE_REGISTERED );
 					$this->add_channel_user( $dbchan->get_name(), $botnum, 'o' );
 				}
 				
@@ -210,19 +201,11 @@
 				$chan = $this->get_channel( $dbchan_key );
 				if( $chan && !$chan->is_op($botnum) )
 				{
-					$this->mode( $chan->get_name(), '+Ro '. $botnum );
+					$this->op( $chan->get_name(), $botnum );
 					$bot->mode( $chan->get_name(), $dbchan->get_default_modes() );
 					$dbchan->set_create_ts( $chan->get_ts() );
 					$dbchan->save();
 				}
-			}
-
-			foreach( $this->default_bot->channels as $chan_name )
-			{
-				$chan = $this->get_channel( $chan_name );
-				
-				if( !$chan->is_op($botnum) )
-					$this->op( $chan->get_name(), $botnum );
 			}
 		}
 		
@@ -279,7 +262,7 @@
 		
 		function remove_channel_reg( $chan_name )
 		{
-			if( is_channel_record($chan_name) )
+			if( is_object($chan_name) && get_class($chan_name) == 'DB_Channel' )
 				$chan_name = $chan_name->get_name();
 			
 			$chan_reg = 0;
@@ -337,10 +320,10 @@
 		{
 			if( !is_object($user_obj) )
 				return 0;
-			if( !is_account($user_obj) && (!is_user($user_obj) || !$user_obj->is_logged_in()) )
+			if( get_class($user_obj) != 'DB_User' && (!is_user($user_obj) || !$user_obj->is_logged_in()) )
 				return 0;
 
-			if( !is_account($user_obj) )
+			if( get_class($user_obj) != 'DB_User' )
 				$account = $this->get_account( $user_obj->get_account_name() );
 			else
 				$account = $user_obj;
@@ -381,7 +364,7 @@
 			
 			if( !($chan = $this->get_channel_reg($chan_key)) )
 				return false;
-			if( !is_account($account_obj) )
+			if( !is_object($account_obj) || !get_class($account_obj) == 'DB_User' )
 				return false;
 			
 			$levels = $chan->get_levels();
@@ -506,4 +489,4 @@
 	
 	$cs = new ChannelService();
 
-
+?>

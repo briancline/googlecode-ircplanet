@@ -30,14 +30,10 @@
  */
 
 	$realname = sprintf('$R%s', $pargs[1] );
-	$lastmod_ts = time();
 	
-	if( $gline = $this->get_gline($realname) )
-	{
-		$lastmod_ts = $gline->get_lastmod_ts();
+	if( $this->get_gline($realname) )
 		$this->remove_gline( $realname );
-	}
 	
-	$this->sendf( FMT_GLINE_REMOVE, SERVER_NUM, $realname, $lastmod_ts );
+	$this->sendf( FMT_GLINE_REMOVE, SERVER_NUM, $realname );
 	
-
+?>

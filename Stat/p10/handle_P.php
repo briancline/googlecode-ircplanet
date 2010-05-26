@@ -41,7 +41,7 @@
 		$bot = $this->users[$cmd_target];
 		$is_private = true;
 	}
-	if( !empty($chan_key) && $cmd_msg[0] == '!' )
+	if( !empty($chan_key) && $message[0] == '!' )
 	{
 		$cmd_msg = substr( $cmd_msg, 1 );
 		$bot = $this->default_bot;
@@ -96,7 +96,9 @@
 					if($cmd_result == false)
 						return false;
 					
-					$this->report_command( $user, $pargs );
+					$report_cmd = str_replace( "_", " ", $cmd_name );
+					$report_cmd = strtoupper( $report_cmd );
+					$this->report_command( $report_cmd, $user, assemble($pargs, 1) );
 				}
 				else
 				{
@@ -117,4 +119,4 @@
 		}
 	}
 
-
+?>

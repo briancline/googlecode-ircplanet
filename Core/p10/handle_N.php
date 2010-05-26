@@ -50,40 +50,22 @@
 		$numeric = $args[$num_args - 2];
 		$desc = $args[$num_args - 1];
 		$account = '';
-		$account_ts = 0;
-		$fakehost = '';
 		$modes = '';
-		$mode_arg = 8;
 		
-		if( $args[7][0] == '+' )
+		if( $num_args == 12 )
 		{
 			$modes = $args[7];
-			
-			if( preg_match('/r/', $modes) )
-				$account = $args[$mode_arg++];
-			if( preg_match('/f/', $modes) )
-				$fakehost = $args[$mode_arg++];
+			$account = $args[8];
 		}
-		
-		if( $ts_idx = strpos($account, ':') )
+		if( $num_args == 11 )
 		{
-			$account_ts = substr($account, $ts_idx + 1);
-			$account = substr($account, 0, $ts_idx);
-
-			/**
-			 * Some variants of ircu also attach another instance of the signon TS
-			 * to this account param, so if we find one, just trash it. No need for it.
-			 */
-			if($sts_idx = strpos($account_ts, ':')) {
-				$account_ts = substr($account_ts, 0, $sts_idx);
-			}
+			if( $args[7][0] == '+')
+				$modes = $args[7];
+			else
+				$account = $args[7];
 		}
 		
-		$user = $this->add_user( $numeric, $nick, $ident, $host, $desc, $start_ts, $ip, $modes, $account, $account_ts );
-		
-		if( !empty($fakehost) ) {
-			$user->set_fakehost( $fakehost );
-		}
+		$this->add_user( $numeric, $nick, $ident, $host, $desc, $start_ts, $ip, $modes, $account );
 	}
 	
 	$user = $this->get_user( $numeric );
@@ -96,4 +78,4 @@
 		$account->save();
 	}
 		
-
+?>

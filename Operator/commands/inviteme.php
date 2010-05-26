@@ -29,6 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+	$nicks = array();
 	$channels = array( EVENT_CHANNEL, COMMAND_CHANNEL );
 	
 	foreach( $channels as $chan_name )
@@ -42,4 +43,4 @@
 		$bot->invite( $user->get_nick(), $chan->get_name() );
 	}
 
-
+?>

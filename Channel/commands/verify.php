@@ -46,3 +46,4 @@
 	$bot->noticef( $user, '%H %s a verified channel service representative.', 
 		$target, $result_text );
 
+?>

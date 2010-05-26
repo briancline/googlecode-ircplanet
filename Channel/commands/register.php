@@ -88,6 +88,6 @@
 	$reg = $this->add_channel_reg( $reg );
 
 	$bot->join( $chan_name );
-	$this->mode( $chan_name, '+Ro '. $bot->get_numeric() );
+	$this->op( $chan_name, $bot->get_numeric() );
 	
-
+?>

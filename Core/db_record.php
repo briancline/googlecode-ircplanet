@@ -238,7 +238,7 @@
 		function save()
 		{
 			$key_name = $this->_key_field;
-			$key_value = '';
+			$key_value = addslashes($this->get_key_value());
 			
 			if(!$this->record_exists())
 			{
@@ -261,7 +261,6 @@
 			}
 			else
 			{
-				$key_value = addslashes($this->get_key_value());
 				$fields = $this->get_update_fieldlist();
 				$u_field = $this->_update_timestamp_field;
 
@@ -322,4 +321,4 @@
 		}
 	}
 	
-
+?>

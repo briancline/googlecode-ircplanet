@@ -48,7 +48,7 @@
 		return false;
 	}
 	
-	$gline = $this->add_gline( $realname, $duration_secs, time(), $reason );
+	$gline = $this->add_gline( $realname, $duration_secs, $reason );
 	$this->enforce_gline( $gline );
 	
-
+?>

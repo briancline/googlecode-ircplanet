@@ -37,7 +37,6 @@
 	$this->set_command_info( 'remuser',        800,   1, false, '<account>' );
 
 	$this->set_command_info( 'broadcast',      700,   1, false, '<message>' );
-	$this->set_command_info( 'fakehost',       700,   2, false, '<nick> <hostname>' );
 	$this->set_command_info( 'jupe',           700,   3, false, '<server> <duration> <reason>' );
 	$this->set_command_info( 'settime',        700,   0, false );
 	$this->set_command_info( 'unjupe',         700,   1, false, '<server>' );
@@ -89,4 +88,4 @@
 	$this->set_command_info( 'whois',            0,   1, false, '<nick>' );
 	$this->set_command_info( 'whoison',          0,   1, false, '<channel>' );
 
-
+?>

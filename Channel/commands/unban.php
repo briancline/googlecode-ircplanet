@@ -42,7 +42,7 @@
 	
 	$mask = $pargs[2];
 
-	if( !preg_match('/[!@\.]/', $mask) )
+	if( !eregi('[!@\.]', $mask) )
 	{
 		if( ($tmp_user = $this->get_user_by_nick($mask)) )
 			$mask = $tmp_user->get_host_mask();
@@ -82,4 +82,4 @@
 		$bot->noticef( $user, 'The ban for %s has been removed.', $mask );
 	}
 	
-
+?>

@@ -66,16 +66,13 @@
 		$chan_list .= $chan->get_name() .' ';
 	}
 	
-	$bot->noticef( $user, 'Nick:         %s (User modes +%s)', $target->get_nick(), $target->get_modes() );
+	$bot->noticef( $user, 'Nick:       %s (User modes +%s)', $target->get_nick(), $target->get_modes() );
 	if( $target->is_logged_in() )
-		$bot->noticef( $user, 'Account:      %s', $acct_str );
+		$bot->noticef( $user, 'Account:    %s', $acct_str );
 	
-	if( $target->is_host_hidden() )
-		$bot->noticef( $user, 'Hidden host:  %s', $target->get_full_mask_safe() );
-		
-	$bot->noticef( $user, 'Full mask:    %s [%s]', $target->get_full_mask(), $target->get_ip() );
-	$bot->noticef( $user, 'Channels:     %s', $chan_list );
-	$bot->noticef( $user, 'Server:       %s', $server->get_name() );
-	$bot->noticef( $user, 'Signed on:    '. get_date($target->get_signon_ts()) );
+	$bot->noticef( $user, 'Full mask:  %s [%s]', $target->get_full_mask(), $target->get_ip() );
+	$bot->noticef( $user, 'Channels:   %s', $chan_list );
+	$bot->noticef( $user, 'Server:     %s', $server->get_name() );
+	$bot->noticef( $user, 'Signed on:  '. get_date($target->get_signon_ts()) );
 
-
+?>

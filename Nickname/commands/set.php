@@ -63,7 +63,7 @@
 		}
 		
 		$account->set_email( $value );
-		$bot->noticef( $user, '%s e-mail address has been updated.', $Who );
+		$bot->notice( $user, '%s e-mail address has been updated.', $Who );
 	}
 	else if( $option == 'INFO' )
 	{
@@ -75,18 +75,6 @@
 		
 		$account->set_info_line( $value );
 		$bot->noticef( $user, '%s info line has been %s.', $Who,
-			empty($value) ? 'cleared' : 'updated' );
-	}
-	else if( $option == 'HOST' && $user_level >= 500 )
-	{
-		if( strlen($value) >= MAXLEN_FAKEHOST )
-		{
-			$bot->notice( $user, 'That host is too long. Please try something shorter.' );
-			return false;
-		}
-		
-		$account->set_fakehost( $value );
-		$bot->noticef( $user, '%s host has been %s.', $Who,
 			empty($value) ? 'cleared' : 'updated' );
 	}
 	else if( $option == 'AUTOOP' )
@@ -209,4 +197,4 @@
 	
 	$account->save();
 	
-
+?>

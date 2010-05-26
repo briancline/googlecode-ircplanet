@@ -43,7 +43,7 @@
 	{
 		if($tmp_user->get_account_id() == $account->get_id())
 		{
-			$instances[] = $tmp_user->get_full_mask_safe();
+			$instances[] = $tmp_user->get_full_mask();
 		}
 	}
 
@@ -87,4 +87,4 @@
 	$bot->noticef( $user, 'Registered:   %s', date('l j F Y h:i:s A T (\G\M\TO)', $account->get_register_ts()) );
 	$bot->noticef( $user, 'Last Seen:    %s', date('l j F Y h:i:s A T (\G\M\TO)', $account->get_lastseen_ts()) );
 
-
+?>

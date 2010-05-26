@@ -136,7 +136,7 @@
 	
 	if( strlen($mode_str) > 0 )
 	{
-		if( !preg_match('/^[+-]/', $mode_str) )
+		if( !eregi('^[+-]', $mode_str) )
 			$mode_str = '+'. $mode_str;
 		if( count($mode_args) > 0 )
 			$mode_str .= ' '. join(' ', $mode_args);
@@ -155,4 +155,4 @@
 	
 //	$bot->noticef( $user, '%s modes are now: %s %s %s', $chan->get_name(), $chan->get_modes(), $chan->get_limit(), $chan->get_key() );
 	
-
+?>

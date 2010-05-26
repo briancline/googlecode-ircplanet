@@ -40,8 +40,11 @@
 	}
 	
 	$t_num = $target->get_numeric();
-	$t_host = $target->get_host_safe();
+	$t_host = 'localhost';
 	$t_chans = '';
+	
+	if($target->is_service() || $source->is_oper() || $source == $target)
+		$t_host = $target->get_host();
 	
 	if(!$target->is_service())
 	{
@@ -106,14 +109,6 @@
 			$target->get_nick(), $target->get_account_name());
 	}
 	
-	if($target->is_host_hidden() && ($target->has_fakehost() || $target->is_logged_in()) 
-		&& ($source->is_service() || $source->is_oper() || $source == $target))
-	{
-		$this->sendf(FMT_WHOIS_REALHOST, SERVER_NUM, $source_num,
-			$target->get_nick(), $target->get_ident(), $target->get_host(), 
-			$target->get_ip());
-	}
-	
 	if($target->is_local())
 	{
 		$this->sendf(FMT_WHOIS_IDLE, SERVER_NUM, $source_num,
@@ -125,4 +120,4 @@
 	$this->sendf(FMT_WHOIS_END, SERVER_NUM, $source_num, 
 		$target->get_nick());
 	
-
+?>

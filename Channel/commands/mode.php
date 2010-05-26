@@ -63,7 +63,6 @@
 			case 'r':
 			case 's':
 			case 't':
-			case 'D':
 				$mode_str .= $mode;
 
 				if( $mode_add )
@@ -74,17 +73,11 @@
 				break;
 			
 			case 'k':
-			case 'A':
-			case 'U':
 				if( $mode_add )
 				{
-					$arg_term = 'key';
-					if( $mode != 'k' )
-						$arg_term = 'password';
-					
 					if( $cmd_num_args < $mode_arg )
 					{
-						$bot->noticef( $user, 'You did not specify a %s!', $arg_term );
+						$bot->notice( $user, 'You did not specify a key!' );
 						return false;
 					}
 					
@@ -139,12 +132,6 @@
 				return false;
 				break;
 			
-			case 'd':
-			case 'R':
-				$bot->noticef( $user, 'You cannot manually set +%s or -%s.', $mode, $mode );
-				return false;
-				break;
-			
 			default:
 				$bot->noticef( $user, '%s is not a valid channel mode!', $mode );
 				return false;
@@ -154,7 +141,7 @@
 	
 	if( strlen($mode_str) > 0 )
 	{
-		if( !preg_match('/^[+-]/', $mode_str) )
+		if( !eregi('^[+-]', $mode_str) )
 			$mode_str = '+'. $mode_str;
 		if( count($mode_args) > 0 )
 			$mode_str .= ' '. join(' ', $mode_args);
@@ -173,4 +160,4 @@
 	
 //	$bot->noticef( $user, '%s modes are now: %s %s %s', $chan->get_name(), $chan->get_modes(), $chan->get_limit(), $chan->get_key() );
 	
-
+?>

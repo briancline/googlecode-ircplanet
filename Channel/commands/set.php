@@ -87,10 +87,9 @@
 			return false;
 		}
 		
-		$value = $this->clean_modes( $value );
 		$chan_reg->set_default_modes( $value );
 		$bot->mode( $chan_name, $value );
-		$bot->noticef( $user, 'Updated default channel modes to %s.', $value );
+		$bot->notice( $user, 'Updated default channel modes.' );
 	}
 	
 	
@@ -399,4 +398,4 @@
 	
 	$chan_reg->save();	
 	
-
+?>

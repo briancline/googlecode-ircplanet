@@ -31,38 +31,28 @@
 	
 	function is_server( $obj )
 	{
-		return ( is_object($obj) && get_class($obj) == 'Server' );
+		return ( get_class($obj) == 'Server' );
 	}
 
 	function is_user( $obj )
 	{
-		return ( is_object($obj) && (get_class($obj) == 'User' || get_class($obj) == 'Bot') );
+		return ( get_class($obj) == 'User' || get_class($obj) == 'Bot' );
 	}
 
 	function is_account( $obj )
 	{
-		return ( is_object($obj) && get_class($obj) == 'DB_User' );
+		return ( get_class($obj) == 'DB_User' );
 	}
 
 	function is_channel( $obj )
 	{
-		return ( is_object($obj) && get_class($obj) == 'Channel' );
-	}
-	
-	function is_channel_record( $obj )
-	{
-		return ( is_object($obj) && get_class($obj) == 'DB_Channel' );
-	}
-	
-	function is_ban_record( $obj )
-	{
-		return ( is_object($obj) && get_class($obj) == 'DB_Ban' );
+		return ( get_class($obj) == 'Channel' );
 	}
 
 	function is_gline( $obj )
 	{
-		return ( is_object($obj) && get_class($obj) == 'Gline' );
+		return ( get_class($obj) == 'Gline' );
 	}
 	
 	
-
+?>

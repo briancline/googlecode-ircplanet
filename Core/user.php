@@ -38,9 +38,7 @@
 		'w' => array( 'const' => 'UMODE_WALLOPS',      'uint' => 0x0010 ),
 		'k' => array( 'const' => 'UMODE_SERVICE',      'uint' => 0x0020 ),
 		'g' => array( 'const' => 'UMODE_HACKMSG',      'uint' => 0x0040 ),
-		'x' => array( 'const' => 'UMODE_HIDDENHOST',   'uint' => 0x0080 ),
-		'r' => array( 'const' => 'UMODE_REGISTERED',   'uint' => 0x0100 ),
-		'f' => array( 'const' => 'UMODE_FAKEHOST',     'uint' => 0x0200 )
+		'x' => array( 'const' => 'UMODE_HIDDENHOST',   'uint' => 0x0080 )
 	);
 
 
@@ -50,10 +48,8 @@
 		var $nick;
 		var $account_id = 0;
 		var $account_name;
-		var $account_ts = 0;
 		var $ident;
 		var $host;
-		var $fakehost;
 		var $ip;
 		var $start_ts;
 		var $desc;
@@ -62,12 +58,11 @@
 		var $last_spoke = START_TIME;
 		var $channels = array();
 		
-		function __construct( $num, $nick, $ident, $host, $ip, $start_ts, $desc, $modes = "", $account = "", $account_ts = 0 )
+		function __construct( $num, $nick, $ident, $host, $ip, $start_ts, $desc, $modes = "", $account = "" )
 		{
 			$this->numeric = $num;
 			$this->nick = $nick;
 			$this->account_name = $account;
-			$this->account_ts = $account_ts;
 			$this->ident = $ident;
 			$this->host = $host;
 			$this->ip = $ip;
@@ -80,18 +75,14 @@
 		function is_service()          { return $this->has_mode(UMODE_SERVICE); }
 		function is_deaf()             { return $this->has_mode(UMODE_DEAF); }
 		function is_oper()             { return $this->has_mode(UMODE_OPER); }
-		function is_registered()       { return $this->has_mode(UMODE_REGISTERED); }
-		function is_host_hidden()      { return $this->has_mode(UMODE_HIDDENHOST); }
 		function is_local()            { return $this->get_server_numeric() == SERVER_NUM; }
 		function is_away()             { return $this->away_msg != ''; }
 		function is_logged_in()        { return $this->account_id > 0; }
 		function has_account_name()    { return strlen($this->account_name) > 0; }
-		function has_fakehost()        { return $this->has_mode(UMODE_FAKEHOST); }
 		
 		function get_nick()            { return $this->nick; }
 		function get_ident()           { return $this->ident; }
 		function get_host()            { return $this->host; }
-		function get_fakehost()        { return $this->fakehost; }
 		function get_ip()              { return $this->ip; }
 		function get_name()            { return $this->desc; }
 		function get_away()            { return $this->away_msg; }
@@ -99,15 +90,12 @@
 		function get_server_numeric()  { return substr($this->numeric, 0, BASE64_SERVLEN); }
 		function get_account_name()    { return $this->account_name; }
 		function get_account_id()      { return $this->account_id; }
-		function get_account_ts()      { return $this->account_ts; }
 		function get_signon_ts()       { return $this->start_ts; }
 		function get_idle_time()       { return time() - $this->last_spoke; }
 		
 		function set_nick($s)          { $this->nick = $s; }
-		function set_fakehost($s)      { $this->fakehost = $s; }
 		function set_account_id($i)    { $this->account_id = $i; }
 		function set_account_name($s)  { $this->account_name = $s; }
-		function set_account_ts($t)    { $this->account_ts = $t; }
 		function set_away($s = "")     { $this->away_msg = $s; }
 		
 		
@@ -172,20 +160,8 @@
 			return $modes;
 		}
 		
-		function get_full_mask()      { return $this->nick .'!'. $this->ident .'@'. $this->host; }
-		function get_full_ip_mask()   { return $this->nick .'!'. $this->ident .'@'. $this->ip; }
-		function get_full_mask_safe() { $mask = $this->nick .'!'. $this->ident .'@'. $this->get_host_safe(); }
-
-		function get_host_safe()
-		{
-			if( $this->has_fakehost() )
-				return $this->get_fakehost();
-			elseif( $this->is_host_hidden() && $this->has_account_name() )
-				return $this->get_account_name() .'.'. HIDDEN_HOST;
-				
-			return $this->get_host();
-		}
-
+		function get_full_mask()     { return $this->nick .'!'. $this->ident .'@'. $this->host; }
+		function get_full_ip_mask()  { return $this->nick .'!'. $this->ident .'@'. $this->ip; }
 		function get_gline_host()    { return $this->ident .'@'. $this->host; }
 		function get_gline_ip()      { return $this->ident .'@'. $this->ip; }
 		function get_gline_mask()    { return substr( $this->get_host_mask(), 2 ); }
@@ -194,13 +170,6 @@
 		{
 			$mask = '*!*'. right( $this->ident, IDENT_LEN ) .'@';
 			$host = $this->host;
-			
-			if( $this->has_fakehost() ) {
-				$host = $this->fakehost;
-			}
-			else if( $this->is_host_hidden() ) {
-				$host = $this->get_account_name() .'.'. HIDDEN_HOST;
-			}
 
 			$levels = explode( '.', $host );
 			$num_levels = count( $levels );
@@ -214,7 +183,7 @@
 			{
 				for( $n = $num_levels - 1; $n > 0; $n-- )
 				{
-					if( preg_match('/[0-9]/', $levels[$n]) )
+					if( eregi('[0-9]', $levels[$n]) )
 						break;
 				}
 				
@@ -267,4 +236,4 @@
 	}
 	
 
-
+?>

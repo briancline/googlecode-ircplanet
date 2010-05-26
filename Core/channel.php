@@ -42,12 +42,7 @@
 		'n' => array( 'const' => 'CMODE_NOEXTMSG',     'uint' => 0x0020 ),
 		'r' => array( 'const' => 'CMODE_REGONLY',      'uint' => 0x0040 ),
 		'l' => array( 'const' => 'CMODE_LIMIT',        'uint' => 0x0080 ),
-		'k' => array( 'const' => 'CMODE_KEY',          'uint' => 0x0100 ),
-		'R' => array( 'const' => 'CMODE_REGISTERED',   'uint' => 0x0200 ),
-		'D' => array( 'const' => 'CMODE_DELJOINS',     'uint' => 0x0400 ),
-		'd' => array( 'const' => 'CMODE_DELJOINSPEND', 'uint' => 0x0800 ),
-		'U' => array( 'const' => 'CMODE_USERPASS',     'uint' => 0x1000 ),
-		'A' => array( 'const' => 'CMODE_ADMINPASS',    'uint' => 0x2000 )
+		'k' => array( 'const' => 'CMODE_KEY',          'uint' => 0x0100 )
 	);
 	
 	
@@ -57,8 +52,6 @@
 		var $topic;
 		var $modes;
 		var $key;
-		var $admin_pass;
-		var $user_pass;
 		var $ts;
 		var $limit = 0;
 		var $bans = array();
@@ -73,26 +66,22 @@
 			$this->limit = $limit;
 		}
 		
-		function __toString()       { return $this->name; }
+		function __toString()     { return $this->name; }
 		
-		function get_name()         { return $this->name; }
-		function get_topic()        { return $this->topic; }
-		function get_ts()           { return $this->ts; }
-		function get_user_count()   { return count( $this->users ); }
-		function get_limit()        { return $this->limit; }
-		function get_key()          { return $this->key; }
-		function get_admin_pass()   { return $this->admin_pass; }
-		function get_user_pass()    { return $this->user_pass; }
+		function get_name()       { return $this->name; }
+		function get_topic()      { return $this->topic; }
+		function get_ts()         { return $this->ts; }
+		function get_user_count() { return count( $this->users ); }
+		function get_limit()      { return $this->limit; }
+		function get_key()        { return $this->key; }
 		
-		function is_secret()        { return $this->has_mode(CMODE_SECRET); }
+		function is_secret()      { return $this->has_mode(CMODE_SECRET); }
 		
-		function set_ts($v)         { $this->ts = $v; }
-		function set_name($v)       { $this->name = $v; }
-		function set_key($v)        { $this->key = $v; }
-		function set_admin_pass($v) { $this->admin_pass = $v; }
-		function set_user_pass($v)  { $this->user_pass = $v; }
-		function set_modes($v)      { $this->modes = 0; $this->add_modes($v); }
-		function set_topic($v)      { $this->topic = $v; }
+		function set_ts($v)    { $this->ts = $v; }
+		function set_name($v)  { $this->name = $v; }
+		function set_key($v)   { $this->key = $v; }
+		function set_modes($v) { $this->modes = 0; $this->add_modes($v); }
+		function set_topic($v) { $this->topic = $v; }
 		function set_limit($v) { 
 			$this->limit = $v;
 			
@@ -146,7 +135,7 @@
 		static function is_valid_mode( $mode )
 		{
 			global $CHANNEL_MODES;
-			return array_key_exists( $mode, $CHANNEL_MODES );
+			return in_array( $mode, $CHANNEL_MODES );
 		}
 		
 		static function is_valid_mode_int( $mode )
@@ -188,7 +177,7 @@
 		function add_mode( $mode )
 		{
 			global $CHANNEL_MODES;
-			if( !is_int($mode) && isset($CHANNEL_MODES[$mode]) )
+			if( !is_int($mode) )
 				return $this->add_mode( $CHANNEL_MODES[$mode]['uint'] );
 			if( $this->is_valid_mode_int($mode) && !$this->has_mode($mode) )
 			{
@@ -206,7 +195,7 @@
 		function remove_mode( $mode )
 		{
 			global $CHANNEL_MODES;
-			if( !is_int($mode) && isset($CHANNEL_MODES[$mode]) )
+			if( !is_int($mode) )
 				return $this->remove_mode( $CHANNEL_MODES[$mode]['uint'] );
 			if( $this->is_valid_mode_int($mode) && $this->has_mode($mode) )
 			{
@@ -214,10 +203,6 @@
 					$this->key = '';
 				if( $mode == CMODE_LIMIT )
 					$this->limit = 0;
-				if( $mode == CMODE_ADMINPASS )
-					$this->admin_pass = '';
-				if( $mode == CMODE_USERPASS )
-					$this->user_pass = '';
 				
 				$this->modes &= ~$mode;
 			}
@@ -246,8 +231,6 @@
 					$modes .= $c;
 					if( $c == 'l' )  $params[] = $this->get_limit();
 					if( $c == 'k' )  $params[] = $this->get_key();
-					if( $c == 'A' )  $params[] = $this->get_admin_pass();
-					if( $c == 'U' )  $params[] = $this->get_user_pass();
 				}
 			}
 			
@@ -266,24 +249,6 @@
 		{
 			foreach( $this->users as $numeric => $user )
 				$user->clear_modes();
-		}
-		
-		function clear_ops()
-		{
-			foreach( $this->users as $user )
-			{
-				if( $user->is_op() )
-					$user->remove_mode( CUMODE_OP );
-			}
-		}
-		
-		function clear_voices()
-		{
-			foreach( $this->users as $user )
-			{
-				if( $user->is_voice() )
-					$user->remove_mode( CUMODE_VOICE );
-			}
 		}
 		
 		function clear_bans()
@@ -359,20 +324,7 @@
 		
 		function add_user( $numeric, $modes )
 		{
-			$oplevel = 0;
-			for($i = 0; $i < strlen($modes); $i++)
-			{
-				if( is_numeric($modes[$i]) )
-				{
-					$omodes = $modes;
-					$oplevel = substr( $modes, $i );
-					$modes = substr( $modes, 0, $i );
-					$modes .= 'o';
-					break;
-				}
-			}
-			
-			$this->users[$numeric] = new ChannelUser( $numeric, $modes, $oplevel );
+			$this->users[$numeric] = new ChannelUser( $numeric, $modes );
 		}
 		
 		function remove_user( $numeric )
@@ -384,8 +336,6 @@
 		function remove_op( $numeric )      { if($this->is_on($numeric)) $this->users[$numeric]->remove_mode( CUMODE_OP ); }
 		function add_voice( $numeric )      { if($this->is_on($numeric)) $this->users[$numeric]->add_mode( CUMODE_VOICE ); }
 		function remove_voice( $numeric )   { if($this->is_on($numeric)) $this->users[$numeric]->remove_mode( CUMODE_VOICE ); }
-		
-		function set_oplevel( $numeric, $level )  { if($this->is_op($numeric)) $this->users[$numeric]->set_oplevel( $level ) ; }
 		
 		function is_on( $numeric )     { return( array_key_exists($numeric, $this->users) ); }
 		function is_op( $numeric )     { return( $this->is_on($numeric) && $this->users[$numeric]->is_op() ); }
@@ -445,4 +395,4 @@
 	}
 	
 	
-
+?>

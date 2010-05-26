@@ -103,8 +103,7 @@
 		{
 			foreach($this->db_glines as $key => $db_gline)
 			{
-				$this->add_gline( $db_gline->get_mask(), $db_gline->get_remaining_secs(), 
-						$db_gline->get_set_ts(), $db_gline->get_reason() );
+				$this->add_gline( $db_gline->get_mask(), $db_gline->get_remaining_secs(), $db_gline->get_reason() );
 				$this->enforce_gline( $db_gline->get_mask() );
 			}
 			
@@ -120,7 +119,7 @@
 			foreach( $this->pending_events as $event )
 			{
 				extract( $event );
-				$this->default_bot->messagef( $chan_name, '[%'. (NICK_LEN + $margin) .'s] %s %s',
+				$this->default_bot->messagef( $chan_name, '[%'. (NICKLENGTH + $margin) .'s] %s %s',
 					$source, $event_name, $misc);
 
 				$this->pending_events = array();
@@ -230,13 +229,13 @@
 
 
 
-		function service_add_gline( $host, $duration, $lastmod, $reason )
+		function service_add_gline( $host, $duration, $reason )
 		{
 			if( $this->get_db_gline($host) )
 				return false;
 
 			$gline = new DB_Gline();
-			$gline->set_ts( $lastmod );
+			$gline->set_ts( time() );
 			$gline->set_mask( $host );
 			$gline->set_duration( $duration );
 			$gline->set_reason( $reason );
@@ -540,29 +539,27 @@
 			
 			$bot = $this->default_bot;
 			
-			if( is_server($source) )
-				$source = BOLD_START . $source->get_name_abbrev(NICK_LEN) . BOLD_END;
-			else if( is_user($source) )
+			$source_type = get_class($source);
+			if($source_type == 'Server')
+				$source = BOLD_START . $source->get_name_abbrev(NICKLENGTH) . BOLD_END;
+			else if($source_type == 'User')
 				$source = $source->get_nick();
 			
 			for($i = 1; $i <= 5; $i++)
 			{
 				eval('$arg = $arg'. $i .';');
-
-				if(!is_object($arg)) {
-					continue;
-				}
 				
-				if( is_server($arg) || is_channel($arg) )
+				$arg_type = get_class($arg);
+				if($arg_type == 'Server' || $arg_type == 'Channel')
 					$arg = $arg->get_name();
-				else if( is_user($arg) )
+				else if($arg_type == 'User')
 					$arg = $arg->get_nick();
 				
 				eval('$arg'. $i .' = $arg;');
 			}
 			
-			if(strlen($source) > NICK_LEN)
-				$source = substr($source, 0, NICK_LEN);
+			if(strlen($source) > NICKLENGTH)
+				$source = substr($source, 0, NICKLENGTH);
 			
 			$margin = substr_count( $source, BOLD_START );
 			$misc = $arg1 .' '. $arg2 .' '. $arg3 .' '. $arg4 .' '. $arg5;
@@ -578,12 +575,12 @@
 					'misc'        => $misc );
 			}
 
-			$bot->messagef( $channel, '[%'. (NICK_LEN + $margin) .'s] %s %s',
+			$bot->messagef( $channel, '[%'. (NICKLENGTH + $margin) .'s] %s %s',
 				$source, $event_name, $misc);
 
 /*
 			if($this->finished_burst)
-				$bot->messagef( $channel, "[%". (NICK_LEN + $margin) ."s] %s %s", $source, $event_name, $misc);
+				$bot->messagef( $channel, "[%". (NICKLENGTH + $margin) ."s] %s %s", $source, $event_name, $misc);
 */
 			
 			return true;
@@ -592,4 +589,4 @@
 	
 	$os = new OperatorService();
 
-
+?>

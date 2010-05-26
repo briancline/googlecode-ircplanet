@@ -81,9 +81,8 @@
 		
 		if( !$user->has_account_name() )
 		{
-			$this->sendf( FMT_ACCOUNT, SERVER_NUM, $numeric, $user_name, $account->get_register_ts() );
+			$this->sendf( FMT_ACCOUNT, SERVER_NUM, $numeric, $user_name );
 			$user->set_account_name( $user_name );
-			$user->set_account_id( $account->get_id() );
 		}
 		
 		$bot->noticef( $user,
@@ -95,4 +94,4 @@
 		$bot->notice( $user, "You have already registered your nick and logged in." );
 	}
 
-
+?>

@@ -33,7 +33,7 @@
 	define( 'CORE_NAME',           'Services Core' );
 	define( 'CORE_VERSION_MAJOR',  1 );
 	define( 'CORE_VERSION_MINOR',  3 );
-	define( 'CORE_VERSION_REV',    1 );
+	define( 'CORE_VERSION_REV',    0 );
 	
 	define( 'CORE_VERSION',        CORE_VENDOR .' '.
 	                               CORE_NAME .' v'.
@@ -45,12 +45,7 @@
 	define( 'P10_DIR',             CORE_DIR .'/p10/' );
 	define( 'CORE_TIMER_DIR',      CORE_DIR .'/timers/' );
 	
-	define( 'NICK_LEN',            15 );
-	define( 'IDENT_LEN',           10 );
-	define( 'HOST_LEN',            64 );
-	define( 'ACCOUNT_LEN',         NICK_LEN );
-	define( 'HIDDEN_HOST',         'users.ircplanet.net' );
-	define( 'TOPIC_BURSTING',      true );
+	define( 'NICKLENGTH',          15 );
 	
 	define( 'SOCKET_TIMEOUT',       5 );
 	
@@ -98,4 +93,4 @@
 	
 	require_once( CORE_DIR .'/uptime.php' );
 	
-
+?>

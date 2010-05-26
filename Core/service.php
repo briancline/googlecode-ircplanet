@@ -190,13 +190,13 @@
 			$this->add_server( '', SERVER_NUM, SERVER_NAME, SERVER_DESC, START_TIME, SERVER_MAXUSERS, SERVER_MODES );
 			$this->default_bot = $this->add_bot( BOT_NICK, BOT_IDENT, BOT_HOST, BOT_DESC, START_TIME, BOT_IP, BOT_MODES );
 
-			if( defined('REPORT_EVENTS') && REPORT_EVENTS && defined('EVENT_CHANNEL') )
+			if( REPORT_EVENTS && defined('EVENT_CHANNEL') )
 			{
 				$this->add_channel( EVENT_CHANNEL, START_TIME, EVENT_CHANMODES );
 				$this->add_channel_user( EVENT_CHANNEL, $this->default_bot->get_numeric(), 'o' );
 			}
 
-			if( defined('REPORT_COMMANDS') && REPORT_COMMANDS && defined('COMMAND_CHANNEL') )
+			if( REPORT_COMMANDS && defined('COMMAND_CHANNEL') )
 			{
 				$this->add_channel( COMMAND_CHANNEL, START_TIME, COMMAND_CHANMODES );
 				$this->add_channel_user( COMMAND_CHANNEL, $this->default_bot->get_numeric(), 'o' );
@@ -382,7 +382,7 @@
 			$this->bytes_sent += strlen( $buffer );
 			$this->lines_sent++;
 			
-			if( !preg_match("/^.. [GZ] /", $buffer) )
+			if( !eregi("^.. [GZ] ", $buffer) )
 				debug( "[SEND] ". trim($buffer) );
 		}
 
@@ -534,10 +534,10 @@
 		}
 		
 		
-		function add_user( $num, $nick, $ident, $host, $desc, $start_ts, $ip = "0.0.0.0", $modes = "i", $account = "", $account_ts = 0 )
+		function add_user( $num, $nick, $ident, $host, $desc, $start_ts, $ip = "0.0.0.0", $modes = "i", $account = "" )
 		{
 			$server = substr( $num, 0, BASE64_SERVLEN );
-			$this->users[$num] = new User( $num, $nick, $ident, $host, $ip, $start_ts, $desc, $modes, $account, $account_ts );
+			$this->users[$num] = new User( $num, $nick, $ident, $host, $ip, $start_ts, $desc, $modes, $account );
 			$this->servers[$server]->add_user( $num );
 			return $this->users[$num];
 		}
@@ -573,13 +573,13 @@
 		}
 		
 		
-		function add_gline( $host, $duration, $lastmod, $reason = "" )
+		function add_gline( $host, $duration, $reason = "" )
 		{
 			$gline_key = strtolower( $host );
-			$this->glines[$gline_key] = new GLine( $host, $duration, $lastmod, $reason );
+			$this->glines[$gline_key] = new GLine( $host, $duration, $reason );
 			
 			if( method_exists($this, 'service_add_gline') )
-				$this->service_add_gline( $host, $duration, $lastmod, $reason );
+				$this->service_add_gline( $host, $duration, $reason );
 
 			return $this->glines[$gline_key];
 		}
@@ -597,12 +597,11 @@
 		
 		function enforce_gline( $gline )
 		{
-			if( !is_gline($gline) && !($gline = $this->get_gline($gline)) )
+			if( get_class($gline) != 'Gline' && !($gline = $this->get_gline($gline)) )
 				return false;
 			
 			$this->sendf( FMT_GLINE_ADD, SERVER_NUM, $gline->get_mask(), 
-				$gline->get_duration(), $gline->get_lastmod_ts(), 
-				$gline->get_reason() );
+				$gline->get_duration(), $gline->get_reason() );
 			return true;
 		}
 		
@@ -669,18 +668,18 @@
 		}
 
 
-		function get_clone_count( $ip )
-		{
-			$count = 0;
+                function get_clone_count( $ip )
+                {
+                        $count = 0;
 
-			foreach( $this->users as $numeric => $user )
-			{
-				if( $user->get_ip() == $ip )
-					$count++;
-			}
+                        foreach( $this->users as $numeric => $user )
+                        {
+                                if( $user->get_ip() == $ip )
+                                        $count++;
+                        }
 
-			return $count;
-		}
+                        return $count;
+                }
 		
 		
 		function add_channel( $name, $ts, $modes = "", $key = "", $limit = 0 )
@@ -883,7 +882,7 @@
 
 		function remove_account( $account )
 		{
-			if( is_account($account) )
+			if( is_object($account) && get_class($account) == 'DB_User' )
 				$account = $account->get_name();
 			elseif( is_object($account) )
 				return false; // What kind of object are you giving me?!
@@ -908,8 +907,7 @@
 			
 			$noncritical_socket_errors = array( 
 				0,    // no error
-				11,   // no data to read (resource temporarily unavailable),
-				35    // no data to read (resource temporarily unavailable - BSD)
+				11    // no data to read (resource temporarily unavailable)
 			);
 			
 			$GLOBALS['INSTANTIATED_SERVICES'][] = $this;
@@ -951,7 +949,7 @@
 						$line = substr( $buffer, 0, $endpos - 1 );
 						$buffer = substr( $buffer, $endpos + 1 );
 						
-						if( !preg_match("/^.. [GZ] /", $line) )
+						if( !eregi("^.. [GZ] ", $line) )
 							debug("[RECV] $line");
 						
 						$this->parse( $line );
@@ -1010,9 +1008,8 @@
 			// TODO: Breaks everything; slated for 1.3 or 2.0
 			//$core_result = $this->handler_container( $core_handler, true, $num_args, $args, $chan_name, $chan_key, $bot );
 			//$service_result = $this->handler_container( $service_handler, false, $num_args, $args, $chan_name, $chan_key, $bot );
-			//return $core_result && $service_result;
-
-			return true;
+			
+			return $core_result && $service_result;
 		}
 		
 		
@@ -1024,74 +1021,6 @@
 				debug( "*** Core handler file $handler_file does not exist!" );
 			
 			return true;
-		}
-		
-		
-		/**
-		 * clean_modes: Returns a clean and parsed version of the MODE string passed
-		 * in the first argument.
-		 * 
-		 * This method does NOT parse a full MODE line; only a channel mode string line
-		 * that is structured like so:
-		 *     +ntxyzkl key limit
-		 * Then, returns a cleaned string with valid and accepted modes:
-		 *     +ntkl key limit
-		 * If $accept_user_modes is set to true, it will not remove any +o/+v/+b mode
-		 * changes. Otherwise, they will be cleansed.
-		 * 
-		 * This is currently useful for services which accept a mode change from users,
-		 * but where a subset of modes should not be accepted; for instance, setting the
-		 * default mode string on a registered channel in the channel service. In such 
-		 * a case, you wouldn't want users setting -R, -A, -o CS, and so on.
-		 */
-		function clean_modes( $modes, $accept_user_modes = false )
-		{
-			$clean_modes = '+';
-			$clean_mode_args = '';
-			$disallowed_modes = array('R', 'd', 'A', 'U');
-			$param_modes_add = array('l', 'k', 'U', 'A', 'o', 'v', 'b');
-			$param_modes_sub = array('k', 'U', 'A', 'o', 'v', 'b');
-			
-			if(!$accept_user_modes) {
-				$disallowed_modes = array_merge($disallowed_modes, 
-					array('o', 'v', 'b'));
-			}
-			
-			$in_arg = 0;
-			$in_args = split(' ', $modes);
-			if(count($in_args) > 1) {
-				$modes = array_shift($in_args);
-			}
-			
-			$is_sub = false;
-			for($i = 0; $i < strlen($modes); $i++) {
-				$arg = '';
-				$mode = $modes[$i];
-				
-				if($mode == '-')
-					$is_sub = true;
-				if($mode == '+')
-					$is_sub = false;
-				
-				if((!$is_sub && in_array($mode, $param_modes_add)) 
-						|| ($is_sub && in_array($mode, $param_modes_sub)))
-					$arg = $in_args[$in_arg++];
-				
-				if(!Channel::is_valid_mode($mode) 
-						|| in_array($mode, $disallowed_modes) 
-						|| $is_sub 
-						|| preg_match('/'. $mode .'/', $clean_modes)) {
-					continue;
-				}
-				
-				$clean_modes .= $mode;
-				
-				if(!empty($arg)) {
-					$clean_mode_args .= ' '. $arg;
-				}
-			}
-			
-			return $clean_modes . $clean_mode_args;
 		}
 		
 		
@@ -1159,55 +1088,11 @@
 							$readable_args[] = $key;
 						}
 					}
-					else if( $mode == 'A' )
-					{
-						if( $add ) {
-							$apass = $args[$mode_arg++];
-							$chan->add_mode( $mode );
-							$chan->set_admin_pass( $apass );
-							$readable_args[] = $apass;
-						}
-						else {
-							$apass = $args[$mode_arg++];
-							$chan->remove_mode( $mode );
-							$chan->set_admin_pass( '' );
-							$readable_args[] = $apass;
-						}
-					}
-					else if( $mode == 'U' )
-					{
-						if( $add ) {
-							$upass = $args[$mode_arg++];
-							$chan->add_mode( $mode );
-							$chan->set_user_pass( $upass );
-							$readable_args[] = $upass;
-						}
-						else {
-							$upass = $args[$mode_arg++];
-							$chan->remove_mode( $mode );
-							$chan->set_user_pass( '' );
-							$readable_args[] = $upass;
-						}
-					}
 					else if( $mode == 'o' )
 					{
 						$numeric = $args[$mode_arg++];
-						$oplevel = 0;
-						$has_oplevel = (strlen($numeric) > 5 && $numeric[5] == ':');
-						
-						if( $has_oplevel )
-						{
-							$oplevel = substr( $numeric, 6 );
-							$numeric = substr( $numeric, 0, 5 );
-						}
-						
 						if( $add )
-						{
 							$chan->add_op( $numeric );
-							
-							if( $has_oplevel )
-								$chan->set_oplevel( $numeric, $oplevel );
-						}
 						else
 							$chan->remove_op( $numeric );
 
@@ -1300,8 +1185,7 @@
 			$source = $args[0];
 			$target = $args[2];
 			$outgoing = array();
-			$param_modes = array('l', 'k', 'A', 'U', 'b', 'v', 'o');
-			$mode_count = 0;
+			$param_modes = array('l', 'k', 'b', 'v', 'o');
 			
 			$is_chan = ( $target[0] == '#' );
 			
@@ -1311,7 +1195,6 @@
 				$modes = $args[3];
 				$arg_num = 4;
 				$tmp_modes = '';
-				$tmp_pol = '';
 				$tmp_args = array();
 				$rem_args = array_copy( $args, $arg_num );
 				
@@ -1321,10 +1204,7 @@
 					$tmp_modes .= $mode;
 					
 					if( $mode == '+' || $mode == '-' )
-					{
-						$tmp_pol = $mode;
 						continue;
-					}
 					
 					if( in_array($mode, $param_modes) )
 					{
@@ -1332,11 +1212,11 @@
 						array_shift( $rem_args );
 					}
 					
-					if( ++$mode_count == MAX_MODES_PER_LINE || $i == strlen($modes) - 1 )
+					if( ++$mode_count == MAX_MODES_PER_LINE || $i == strlen($modes) - 1 );
 					{
 						$outgoing[] = irc_sprintf( "%s M %s %s %A", $source, $target, $tmp_modes, $tmp_args );
 						$mode_count = 0;
-						$tmp_modes = $tmp_pol;
+						$tmp_modes = '';
 						$tmp_args = array();
 					}
 				}
@@ -1362,7 +1242,6 @@
 			else
 			{
 				$outgoing[] = $proto_str;
-				// TODO: This portion isn't actually used anywhere yet... but isn't there something missing here?
 			}
 		}
 
@@ -1439,7 +1318,7 @@
 		}
 
 		
-		function perform_chan_user_mode( $source_num, $chan_name, $mode_pol, $mode_char, $arg_list )
+		function perform_chan_user_mode( $chan_name, $mode_pol, $mode_char, $arg_list )
 		{
 			$args = array();
 			$chan = $this->get_channel( $chan_name );
@@ -1452,22 +1331,48 @@
 				$arg_list = array();
 				$arg_count = func_num_args();
 
-				for( $i = 4; $i < $arg_count; ++$i )
+				for( $i = 3; $i < $arg_count; ++$i )
 					$arg_list[] = func_get_arg($i);
 			}
 
 			$mode_str = $mode_pol . str_repeat( $mode_char, count($arg_list) );
 			$mode_args = implode( ' ', $arg_list );
-			$mode_line = irc_sprintf( FMT_MODE_HACK, $source_num, $chan->get_name(), $mode_str, $mode_args, $chan->get_ts() );
+			$mode_line = irc_sprintf( FMT_MODE_HACK, SERVER_NUM, $chan->get_name(), $mode_str, $mode_args, $chan->get_ts() );
 			return $this->send_mode_line( $mode_line );
+
+			for( $i = 0; $i < count($arg_list); ++$i )
+			{
+				$args[] = $arg_list[$i];
+				
+				if($mode_pol == '+' && $mode_char == 'o')
+					$chan->add_op( $arg_list[$i] );
+				else if($mode_pol == '-' && $mode_char == 'o')
+					$chan->remove_op( $arg_list[$i] );
+				else if($mode_pol == '+' && $mode_char == 'v')
+					$chan->add_voice( $arg_list[$i] );
+				else if($mode_pol == '-' && $mode_char == 'v')
+					$chan->remove_voice( $arg_list[$i] );
+				else if($mode_pol == '+' && $mode_char == 'b')
+					$chan->add_ban( $arg_list[$i] );
+				else if($mode_pol == '-' && $mode_char == 'b')
+					$chan->remove_ban( $arg_list[$i] );
+				
+				if( count($args) == MAX_MODES_PER_LINE || $i == (count($arg_list) - 1) )
+				{
+					$this->sendf( FMT_MODE_HACK_NOTS, SERVER_NUM, 
+						$chan->get_name(), 
+						$mode_pol . str_repeat($mode_char, count($args)),
+						join(" ", $args) );
+				}
+			}
 		}
 		
-		function op( $chan_name, $num_list )       { return $this->perform_chan_user_mode(SERVER_NUM, $chan_name, '+', 'o', $num_list); }
-		function deop( $chan_name, $num_list )     { return $this->perform_chan_user_mode(SERVER_NUM, $chan_name, '-', 'o', $num_list); }
-		function voice( $chan_name, $num_list )    { return $this->perform_chan_user_mode(SERVER_NUM, $chan_name, '+', 'v', $num_list); }
-		function devoice( $chan_name, $num_list )  { return $this->perform_chan_user_mode(SERVER_NUM, $chan_name, '-', 'v', $num_list); }
-		function ban( $chan_name, $num_list )      { return $this->perform_chan_user_mode(SERVER_NUM, $chan_name, '+', 'b', $num_list); }
-		function unban( $chan_name, $num_list )    { return $this->perform_chan_user_mode(SERVER_NUM, $chan_name, '-', 'b', $num_list); }
+		function op( $chan_name, $num_list )       { return $this->perform_chan_user_mode($chan_name, '+', 'o', $num_list); }
+		function deop( $chan_name, $num_list )     { return $this->perform_chan_user_mode($chan_name, '-', 'o', $num_list); }
+		function voice( $chan_name, $num_list )    { return $this->perform_chan_user_mode($chan_name, '+', 'v', $num_list); }
+		function devoice( $chan_name, $num_list )  { return $this->perform_chan_user_mode($chan_name, '-', 'v', $num_list); }
+		function ban( $chan_name, $num_list )      { return $this->perform_chan_user_mode($chan_name, '+', 'b', $num_list); }
+		function unban( $chan_name, $num_list )    { return $this->perform_chan_user_mode($chan_name, '-', 'b', $num_list); }
 
 		function topic( $chan_name, $topic, $chan_ts = 0 )
 		{
@@ -1552,11 +1457,11 @@
 				return;
 
 			$command = array_shift( $args );
-			$log_msg = irc_sprintf('[%'. NICK_LEN .'H] %s%s%s %A',
+			$log_msg = irc_sprintf('[%'. NICKLENGTH .'H] %s%s%s %A',
 				$user, BOLD_START, $command, BOLD_END, $args );
 
 			$this->default_bot->message( COMMAND_CHANNEL, $log_msg );
 		}
 	}
 	
-
+?>

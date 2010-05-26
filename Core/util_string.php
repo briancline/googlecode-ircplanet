@@ -37,7 +37,7 @@
 	
 	function is_valid_email( $email )
 	{
-		$b = preg_match( '/^[a-z0-9._\-%]+@[a-z0-9._\-]+\.[a-z]{2,4}$/i', $email );
+		$b = eregi( '^[a-z0-9._-]+@[a-z0-9._-]+\.[a-z]{2,4}$', $email );
 		
 		return $b;
 	}
@@ -45,7 +45,7 @@
 	
 	function is_ip( $s )
 	{
-		return preg_match( '/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$/', $s );
+		return eregi( '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$', $s );
 	}
 
 
@@ -86,30 +86,6 @@
 		
 		if( strlen($ident) > IDENT_LEN )
 		{
-			$mask = substr($mask, 0, $ex_pos) .'!*'. right($ident, IDENT_LEN - 1) . substr($mask, $at_pos);
-		}
-		
-		return $mask;
-	}
-	
-	function fix_nick_host_mask( $mask )
-	{
-		$ex_pos = strpos( $mask, '!' );
-		$at_pos = strpos( $mask, '@' );
-		
-		if( $at_pos === false ) {
-			$mask = '*@'. $mask;
-			$at_pos = 1;
-		}
-		
-		if( $ex_pos === false ) {
-			$mask = '*!'. $mask;
-			$ex_pos = 1;
-			$at_pos = strpos( $mask, '@' );
-		}
-		
-		$ident = substr( $mask, $ex_pos + 1, $at_pos - $ex_pos - 1 );
-		if( strlen($ident) > IDENT_LEN ) {
 			$mask = substr($mask, 0, $ex_pos) .'!*'. right($ident, IDENT_LEN - 1) . substr($mask, $at_pos);
 		}
 		
@@ -403,4 +379,4 @@
 
 	
 
-
+?>

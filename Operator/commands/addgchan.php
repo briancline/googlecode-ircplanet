@@ -33,7 +33,7 @@
 	$duration = $pargs[2];
 	$reason = assemble( $pargs, 3 );
 	
-	if( !preg_match('/^#/', $channel) )
+	if( !eregi('^#', $channel) )
 	{
 		$bot->noticef( $user, '%s is not a valid channel name.', $channel );
 		return false;
@@ -54,7 +54,7 @@
 		return false;
 	}
 	
-	$gline = $this->add_gline( $channel, $duration_secs, time(), $reason );
+	$gline = $this->add_gline( $channel, $duration_secs, $reason );
 	$this->enforce_gline( $gline );
 	
-
+?>

@@ -37,7 +37,7 @@
 	{
 		$mask = $tmp_user->get_gline_mask();
 	}
-	else if( !preg_match('/[@\.]/', $mask) )
+	else if( !eregi('[@\.]', $mask) )
 	{
 		$bot->noticef( $user, 'Gline masks must be in the ident@host form. Nick masks are not allowed.' );
 		return false;
@@ -67,9 +67,9 @@
 		return false;
 	}
 	
-	$gline = $this->add_gline( $mask, $duration_secs, time(), $reason );
+	$gline = $this->add_gline( $mask, $duration_secs, $reason );
 	$this->enforce_gline( $gline );
 	
 	$mask = fix_host_mask( $mask );
 	
-
+?>

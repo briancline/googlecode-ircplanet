@@ -81,7 +81,7 @@
 			
 			$tmpname = $tmpuser->get_name();
 			
-			if( strtolower($tmpname) == strtolower($user_mask) || fnmatch($user_mask, $tmpname) )
+			if( $tmpname == $user_mask || fnmatch($user_mask, $tmpname) )
 			{
 				$users[] = $access;
 				$n++;
@@ -134,4 +134,4 @@
 		
 	$bot->noticef( $user, 'Found %d records matching your search.', $n );
 	
-
+?>
