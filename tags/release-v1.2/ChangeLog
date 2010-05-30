@@ -1,0 +1,2089 @@
+Brian Cline	<brian@ircplanet.net>	2010-05-29
+
+	* Core/globals.php: Bump Core to v1.4.0.
+
+	* Channel/globals.php: Bump CS to v1.7.0.
+
+	* Defense/globals.php: Bump DS to v1.1.0.
+
+	* Nickname/globals.php: Bump NS to v1.5.0.
+
+	* Operator/globals.php: Bump OS to v1.5.0.
+
+	* Stat/globals.php: Bump SS to v1.1.0.
+
+Brian Cline	<brian@ircplanet.net>	2010-05-29
+
+	* db_schema.sql: Update the database schema dump with new help text and
+	some table updates. Oddly, there was also a table in here that wasn't
+	in any prior revision, and some tables that shouldn't have been in.
+
+Brian Cline	<brian@ircplanet.net>	2010-05-22
+
+	* Core/p10/handle_FA.php: Not sure how this didn't make it in roughly 8-10
+	revisions ago. This is the P10 FAKEHOST (FA) handler.
+
+Brian Cline	<brian@ircplanet.net>	2010-05-22
+
+	* db_schema.sql: Add the ds_whitelist table to the schema.
+	
+	* Core/util_string.php: Add fix_nick_host_mask(), which takes in a mask
+	input and ensures that it has a proper nick!user@host format. If any
+	element is missing, a * is substituted.
+	
+	* Defense/ds.php: Add methods to load, create, remove, and find whitelist
+	entries in memory. Also add a method to check whether someone is 
+	whitelisted.
+
+	* Defense/db_whitelistentry.php: Add the DB_WhitelistEntry object, which
+	manages whitelist entries in the database.
+	
+	* Defense/commands.php: Add ADDWHITE, REMWHITE, and SHOWWHITE to the
+	command map.
+	
+	* Defense/commands/addwhite.php: Add the ADDWHITE command to add entries
+	to the whitelist.
+	
+	* Defense/commands/showwhite.php: Add the SHOWWHITE command to list out
+	all entries in the whitelist.
+	
+	* Defense/commands/remwhite.php: Add the REMWHITE command to remove an
+	entry from the whitelist.
+	
+	* Defense/p10/handle_N.php: Don't scan any users who are whitelisted.
+
+Brian Cline	<brian@ircplanet.net>	2010-05-22
+
+	* Core/service.php: Add clean_modes, which will cleanse a user-provided
+	mode string - basically, stripping out +AURd, optionally strip out +ovb,
+	and any mode removals.
+	
+	* Core/channel.php: Fix a bug preventing Channel::is_valid_mode(char)
+	from working - it always returned false. This has been in there for 
+	ages, shamefully...
+	
+	* Core/p10/handle_W.php: Fix typo resulting in a bug - from last commit.
+
+	* Channel/commands/set.php: Clean the default channel modes when they are
+	set by a channel owner/admin.
+
+	* Channel/cs.php: Clean up default modes where necessary when they are 
+	loaded into memory at startup.
+	
+Brian Cline	<brian@ircplanet.net>	2010-05-22
+
+	* Core/p10.php: Add the reply numeric for showing actual user host/ip
+	on a remote WHOIS.
+	
+	* Core/p10/handle_W.php: Reworked to stop defaulting to 'localhost' on a
+	user's host in a remote WHOIS if the requesting user has no permission to
+	see the real host; instead, only show the real user host/ip in the 338 
+	numeric, exactly like ircu does it. This should make all services use the
+	same logic/behavior as ircu when determining what WHOIS information to 
+	reply with.
+
+Brian Cline	<brian@ircplanet.net>	2010-05-21
+
+	* Core/p10/handle_W.php: Use the "safe" host for a user on remote WHOIS.
+
+	* Core/user.php: Move existing "safe" host code (previously only used
+	for full hostmasks) to its own method, get_safe_host.
+
+Brian Cline	<brian@ircplanet.net>	2010-05-18
+
+	* Channel/commands/access.php: Fix a bug causing ACCESS #chan USERNAME
+	not to show matching results when users specified a full nick (not a 
+	mask) that didn't match the exact case of the account name. No longer
+	case sensitive.
+
+Brian Cline	<brian@ircplanet.net>	2010-05-17
+
+	* Core/p10.php: Add 401 numeric for "No such nick" error.
+	
+	* Core/p10/handle_P.php: Send the source a 401 "No such nick" error if
+	they attempt to securely message a non-existent nick on this server.
+	This fixes a critical crash bug.
+
+Brian Cline	<brian@ircplanet.net>	2010-05-17
+
+	* db_schema.sql: Add field for storing custom user hosts help for SET HOST
+	on NS, and documentation for it.
+	
+	* Core/p10.php: Add the FMT_FAKEHOST format for sending out fakehost
+	changes. This is designed to be used in the following format:
+	<servernum> FA <usernum> <hostname>
+	
+	* Core/user.php: Add the +f user mode for FAKEHOST support, as well as
+	the necessary members and methods to keep track of it. If one is present
+	then use it when generating a hostmask (for bans, etc). Also add the new
+	method get_full_mask_safe() which returns the full nick!user@host string,
+	but will use a hidden or fake host if either is present.
+	
+	* Core/db_user.php: Add the fakehost column and the necessary methods to
+	keep track of it on the back end.
+	
+	* Core/p10/handle_AC.php: Set the +r mode on a user in memory once we
+	receive their account information. Previously this was only being set
+	in memory if we'd explicitly received it during a burst.
+	
+	* Core/p10/handle_N.php: Rework the way mode args are parsed from a
+	NICK line. It's now done the almost-right way. It will be done the
+	right way in a future commit. Also, if we detect +f in the mode line,
+	pick up the fakehost and set it in memory accordingly.
+	
+	* Nickname/commands/info.php: Don't show real hosts on logged-in,
+	host-hidden users shown through the INFO command.
+	
+	* Nickname/commands/set.php: Allow NS admins to SET HOST on any user
+	account.
+	
+	* Nickname/commands/login.php: Set a user's fakehost, if one has been
+	given to them, upon successful login.
+	
+	* Nickname/commands/ghost.php: Same.
+	
+	* Operator/commands.php: Add the FAKEHOST command at level 700.
+
+	* Operator/commands/fakehost.php: Add new FAKEHOST command to allow opers
+	to set a user's fakehost.
+	
+	* Operator/commands/whois.php: Modified OS WHOIS command to show a user's
+	hidden host, if present.
+
+Brian Cline	<brian@ircplanet.net>	2010-05-15
+
+	* Core/service.php: Increment starting numeric arg number in 
+	perform_chan_user_mode. Was causing services to send an extra erroneous
+	argument with the mode command where a real numeric should have been.
+	
+	* Channel/commands/delchan.php: Remove manual part code and call 
+	Bot::part instead.
+	
+	* Channel/commands/unreg.php: Same, and set -R when leaving.
+	
+	* Channel/cs.php: Make CS reop itself in the reporting channel when
+	the uplink has an older copy of the channel and CS effectively gets
+	deopped.
+
+Brian Cline	<brian@ircplanet.net>	2010-05-15
+
+	* Core/service.php: Modify Service::perform_chan_user_mode to accept
+	a source numeric, so we can use it in the Bot class.
+	
+	* Core/bot.php: Consolidate all the old, ugly, op/deop/voice/devoice
+	code into the same format as their equivalents in the Service class.
+	This way, everything gets formatted and broken up the same way when
+	sending to the uplink, and subsequently gets processed the exact same
+	way by Service::parse_mode. Also make sure we send out the same way
+	in Bot::clear_modes. 
+	
+	* Channel/commands/voiceall.php: Prevent a PHP warning, and warn the
+	user if the requested action results in nothing happening.
+	
+	* Channel/commands/opall.php: Same.
+	
+	* Channel/commands/devoiceall.php: Same.
+	
+	* Channel/commands/deopall.php: Same.
+
+Brian Cline	<brian@ircplanet.net>	2010-05-15
+
+	* Channel/cs.php: Fix something in the last commit - don't simply prefix
+	a post-burst default mode change with 'R', issue it with the mode hack
+	that reops CS instead.
+
+Brian Cline	<brian@ircplanet.net>	2010-05-15
+
+	* Core/db_record.php: Prevent a PHP warning from cropping up in 
+	DB_Record::save() on unsaved record instances.
+	
+	* Core/bot.php: When issuing a CREATE, use the current time if no 
+	timestamp is already provided.
+	
+	* Channel/commands/join.php: Ensure +R is set when rejoining a channel.
+	
+	* Channel/commands/adminreg.php: Simplify code and ensure +R is being set
+	when joining a newly registered channel.
+	
+	* Channel/commands/delchan.php: Ensure +R gets removed when unregistering
+	a channel.
+	
+	* Channel/commands/register.php: Ensure +R is set when joining a newly
+	registered channel.
+	
+	* Channel/timers/expire_channels.php: Ensure +R gets removed when 
+	unregistering an expired channel.
+	
+	* Channel/cs.php: When loading registered channels from the database,
+	ensure we set +R on them in memory in preparation to BURST them with
+	that mode. And, in the event the uplink BURSTs an older version of a
+	channel that we have in memory, when reopping CS make sure we also
+	issue another +R.
+	
+	* Operator/commands/chaninfo.php: No longer embarrassingly crashes when
+	someone requests a CHANINFO for a non-existent channel. Holycrapwtfbbq.
+
+Brian Cline	<brian@ircplanet.net>	2010-05-15
+
+	* Core/util_obj.php: Add is_ban_record.
+	
+	* Core/user.php: Fix crash bug when getting a user's nick!user@host mask
+	for users with hidden hostmasks (+x).
+	
+	* Channel/db_channel.php: No longer generate a PHP warning by comparing a
+	DB_Ban object to an int ($ban == 0), by using the new is_ban_record
+	function.
+	
+Brian Cline	<brian@ircplanet.net>	2010-05-15
+
+	* Operator/os.php: Fix a small bug causing a PHP warning when 
+	determining the type of a network event source while reporting 
+	an action (in this case, it cropped up on NICK changes). Use the
+	newer is_* functions instead of get_class etc.
+
+	* Core/util_obj.php: Add is_channel_record, which checks to see if the
+	provided object is a DB_Channel object.
+
+	* Core/service.php: Change all cases of the uber-ugly is_object/get_class
+	combos to the proper is_type function calls. WAY better readability.
+
+	* Nickname/ns.php: Same.
+	
+	* Channel/cs.php: Same.
+
+Brian Cline	<brian@ircplanet.net>	2010-05-15
+
+	* ChangeLog: Being pedantic about not exceeding 80 chars per line.
+	
+	* Core/channel.php: Add clear_ops and clear_voices methods.
+	
+	* Core/p10/handle_CM.php: Add a handler for ircu's CM (CLEARMODE) token,
+	which is capable of clearing all modes (except +R, +d, +A, +U), ops, 
+	voices, and/or bans from a channel. This is the same subset of channel
+	modes that ircu will clear.
+
+Brian Cline	<brian@ircplanet.net>	2010-05-15
+
+	* Core/core_globals.php: Move some existing defines from p10.php to here, 
+	as they are the more appropriate place; also add a few others. This 
+	includes renaming NICKLENGTH to NICK_LEN (for consistency sake), moving 
+	IDENT_LEN here, adding HOST_LEN, ACCOUNT_LEN, HIDDEN_HOST, and moving 
+	TOPIC_BURSTING here.
+	
+	* Core/p10.php: Moved IDENT_LEN and TOPIC_BURSTING to core_globals.php.
+	
+	* Core/user.php: When generating a user@host mask, do it with the user's
+	hidden host, if they have one. Otherwise, use their real host like before.
+	Also add an is_host_hidden() method to return whether or not the user has
+	a hidden host (+x).
+	
+	* Core/service.php: Change instances of NICKLENGTH to NICK_LEN.
+	
+	* Operator/os.php: Same.	
+
+Brian Cline	<brian@ircplanet.net>	2010-05-15
+
+	* Core/p10.php: Add lastmod timestamp to the predefined P10 gline removal
+	line.
+	
+	* Operator/commands/remgname.php: Include the lastmod timestamp for glines
+	when sending out the P10 line to remove them from the network; if we don't
+	have a copy of the gline, send it out anyway but use the current timestamp
+	as the lastmod timestamp.
+	
+	* Operator/commands/remgchan.php: Same.
+	
+	* Operator/commands/remgline.php: Same.
+
+Brian Cline	<brian@ircplanet.net>	2010-05-13
+
+	* Remove closing PHP tag from every PHP file.
+	
+	* Core/util_string.php: Fix a bug with this preg_match entry causing
+	warnings in the logs. Apparently you didn't have to escape dash literals
+	with eregi, but do with preg_match.
+
+Brian Cline	<brian@ircplanet.net>	2010-05-11
+
+	* Core/p10/handle_OM.php: Add a P10 handler in the core for the
+	opmode token, since these come across differently than regular
+	mode hacks.
+
+Brian Cline	<brian@ircplanet.net>	2010-05-11
+
+	* Core/service.php: Fix a typo from the last commit.
+	Must. stop. changing. code. after. successful. testing.
+
+Brian Cline	<brian@ircplanet.net>	2010-05-10
+
+	* Core/service.php:
+	(Service::main): Add another socket errno; timed-out socket reads
+	were causing the service to die on Darwin (BSD).
+	(Service::parse_mode): Implement parsing for the new +A/+U modes,
+	and parsing for oplevels.
+	(Service::send_mode_line): Fix a bug causing the password parameter
+	for +A and +U to not be sent out.
+	
+	* Core/channeluser.php: Start keeping track of op levels for channel
+	users.
+	
+	* Core/channel.php: Start keeping track of adminpass and userpass
+	settings on channels. When adding/removing modes, make sure they
+	are actually valid before attempting to access their uint property.
+	Clear out adminpass/userpass when clearing the corresponding modes.
+	Provide the necessary params when retrieving mode strings on channels
+	where +A/+U is set. Parse oplevels if any are provided when adding
+	channel users.
+	
+	* Core/p10/handle_B.php: Implement parsing for adminpass, userpass,
+	and fix a huge bug wherein channel modes, ops, and bans were not
+	being applied in memory when received via BURST on channels whose
+	uplink timestamp exactly matches the channel timestamp.
+	
+	* Channel/commands/mode.php: Allow +D, +A, and +U to be set by channel
+	managers. Add notification to inform users they cannot manually set
+	+d or +R.
+
+Brian Cline	<brian@ircplanet.net>	2010-05-08
+
+	* Core/service.php: Switch from ereg/eregi to preg_match, since the
+	ereg functions are now deprecated in PHP.
+
+	* Core/user.php: Same.
+
+	* Core/util_string.php: Same.
+
+	* Core/p10/handle_O.php: Same.
+
+	* Core/p10/handle_P.php: Same.
+
+	* Channel/commands/ban.php: Same.
+
+	* Channel/commands/kickban.php: Same.
+
+	* Channel/commands/mode.php: Same.
+
+	* Channel/commands/unban.php: Same.
+
+	* Operator/commands/addgchan.php: Same.
+
+	* Operator/commands/ban.php: Same.
+
+	* Operator/commands/gline.php: Same.
+
+	* Operator/commands/kickban.php: Same.
+
+	* Operator/commands/kickban.php: Same.
+
+	* Operator/commands/mode.php: Same.
+
+	* Operator/commands/unban.php: Same.
+
+Brian Cline	<brian@ircplanet.net>	2010-05-08
+
+	* Core/p10.php: Remove unused define for u2.10.12.
+
+	* Core/channel.php: Add newer modes +R, +A, +U, +D, +d to reflect
+	what exists in ircu today. This only recognizes the modes for what
+	they are (and as valid), but does not change any existing 
+	functionality (yet).
+
+Brian Cline	<brian@ircplanet.net>	2010-05-08
+
+	* utils/*: Added several scripts to conver to and from ircu's version
+	 of base64 numerics, IP addresses, user/server numerics, and integers.
+	 Fairly self explanatory for anyone who knows what they're doing.
+
+Brian Cline	<brian@ircplanet.net>	2010-05-07
+
+	* Core/service.php: Fix soft tabs in get_clone_count. Fix a bug in
+	send_mode_line() that caused it to omit the mode polarity character
+	on subsequent lines when it broke up a long mode change line into
+	multiples. Also comment out some old code in perform_chan_user_mode()
+	to make it clear that it's no longer used.
+
+Brian Cline	<brian@ircplanet.net>	2010-05-03
+
+	* Core/p10/handle_B.php: Fix a bug related to Friday's userlist-less
+	BURST bug fix; the userlist was being ignored when a banlist was not
+	present. This fixes - the userlist is picked up no matter what.
+
+	* Operator/os.ini: Remove the 'no' word from one of the INI settings,
+	since apparently PHP considers it a boolean and throws a fatal error
+	if a string contains the word 'no' anywhere. Whatever, PHP. Whatever.
+
+Brian Cline	<brian@ircplanet.net>	2010-05-02
+
+	* Core/p10.php: Adjust AC format to include timestamp.
+
+	* Core/service.php: Adjust add_user to include optional account creation
+	timestamp.
+
+	* Core/user.php: Add umode for +r (logged in to services account). Also
+	add member variable to keep track of account creation timestamp, and
+	adjust the constructor to optionally accept it as another argument.
+
+	* Core/p10/handle_AC.php: If we received an account creation timestamp,
+	store it with the user.
+
+	* Core/p10/handle_N.php: Check to see if we receive an account creation
+	timestamp in the NICK message's account parameter. If so, store it.
+
+	* Nickname/commands/{login,ghost,register}.php: Send account creation 
+	timestamp with ACCOUNT lines.
+
+	* Channel/commands/login.php: And here as well.
+
+	* Operator/commands/login.php: And here.
+
+Brian Cline	<brian@ircplanet.net>	2010-04-29
+
+	* Operator/commands/{voiceall,devoiceall,opall,deopall}.php: Fix a bug
+	causing OS to crash when using a *all command when the command could
+	not apply to any users.
+
+	* Operator/os.php: Add an object check to prevent a PHP warning.
+
+Brian Cline	<brian@ircplanet.net>	2010-04-26
+
+	* Core/service.php: Remove a SINGLE SEMICOLON that was causing CS to
+	split mode command changes across multiple MODE lines (one at a time)
+	for no real reason.
+
+	* Core/util_obj.php: Get rid of some PHP warnings by non-object-proofing
+	the is_xxx functions.
+
+Brian Cline	<brian@ircplanet.net>	2010-04-26
+
+	* Core/p10/handle_B.php: Don't crash if we get a second burst line for
+	a channel wherein the bans are simply being spread across multiple
+	burst lines (the userlist may also be broken up the same way).
+
+Brian Cline	<brian@ircplanet.net>	2010-04-25
+
+	* Core/p10/handle_N.php: Be less strict about P10 "N" argument counts.
+	Non-standard distributions of ircu usually add more args, and I believe
+	even newer versions of u2.10 do as well. This should keep it from
+	skipping mode and/or account information in the event it gets one that
+	has a larger arg count than 12.
+
+Brian Cline	<brian@ircplanet.net>	2010-04-25
+
+	* Nickname/commands/register.php: Fix a bug causing NS not to recognize
+	newly registered users as logged in upon successful registration. We
+	weren't setting the account ID, only the name.
+
+	* Nickname/commands/set.php: Fix typo - using notice where we should
+	have been using noticef, which caused a client to see %s in the message
+	returned when they set their email address.
+
+Brian Cline	<brian@ircplanet.net>	2010-04-17
+
+	* Channel/p10/handle_K.php: Fix a critical bug causing CS to crash when
+	someone gets kicked from a channel. Wasn't checking to see if we were
+	getting a NULL back from CS::get_channel_access().
+
+Brian Cline	<brian@ircplanet.net>	2009-10-23
+
+	* Defense/ds.php: Move debug message; tested and works.
+
+Brian Cline	<brian@ircplanet.net>	2009-10-23
+
+	* Defense/ds.php: Typo.
+
+Brian Cline	<brian@ircplanet.net>	2009-10-23
+
+	* Defense/ds.php: Changed is_blacklisted_file to is_blacklisted_db and
+	modified to check the "ds_blacklist" table in the database for an IP
+	address. This alleviates PHP maximum memory allocation errors on larger 
+	installations where blacklist.txt grew to be too large, as we were
+	previously loading it into memory. Not tested.
+
+	* Defense/ds.ini: Remove option specifying blacklist text file since it's
+	all stored in a database table now.
+	
+	* Defense/p10/handle_N.php: Modified to check is_blacklisted_db rather
+	than the old file-based method.
+	
+Brian Cline	<brian@ircplanet.net>	2009-07-06
+
+	* db_schema.sql: Add table definition for the defense service admin list.
+	Also throw in a few charset declarations where they had previously been
+	missing.
+
+	* Defense/ds.php: Fix a bug wherein the blacklist text file would never be
+	reloaded after modification, since PHP caches the results of filemtime for
+	no good reason.
+
+	* Operator/commands/inviteme.php: Remove an unnecessary array declaration.
+
+Brian Cline	<brian@ircplanet.net>	2009-07-03
+
+	* Operator/p10/handle_GL.php: Fix crash bug - can't report information
+	about a gline we don't have!
+
+Brian Cline	<brian@ircplanet.net>	2009-07-03
+
+	* Core/p10/handle_GL.php: Fix a bug caused by all the recent changes to
+	Gline and Service::add_gline. We weren't picking up the lastmod timestamp
+	when we received a GL message and as a result the reason was turning up
+	empty.
+
+	* Core/p10/handle_SQ.php: Fix a bug wherein the OS log channel message for
+	SQUITs would show an empty source name if a server SQUIT itself.
+
+	* Operator/p10/handle_SQ.php: Source determination moved to core SQ
+	handler due to aforementioned bug.
+
+Brian Cline	<brian@ircplanet.net>	2009-06-29
+
+	* Defense/ds.php: Fix another terrible typo.
+
+Brian Cline	<brian@ircplanet.net>	2009-06-29
+
+	* Defense/ds.php: Fix typo.
+
+Brian Cline	<brian@ircplanet.net>	2009-06-29
+
+	* Defense/ds.ini: Add forgotten option to control whether DS sends gline
+	requests directly to OS or performs them itself (os_gline = true would
+	send all glines to OS). Also add options for a blacklist flat file, which
+	by default is blacklist.txt. It should contain one IP on each line for
+	every IP you wish to have blacklisted.
+
+	* Defense/ds.php: Add is_blacklisted_file to determine whether or not the
+	provided IP address is contained in our flat-file blacklist. This list is
+	loaded after the first 'N' message comes through the wire, and re-loaded 
+	automatically after the file is modified.
+
+	* Defense/p10/handle_N.php: Perform check to see if a host is in the
+	blacklist file upon connection.
+
+Brian Cline	<brian@ircplanet.net>	2009-06-28
+
+	* Core/core_globals.php: Bump revision for new Gline class changes.
+
+Brian Cline	<brian@ircplanet.net>	2009-06-28
+
+	* Core/gline.php: Add the lastmod TS to the Gline class.
+
+	* Core/p10.php: Update GL token parameters to include the lastmod
+	timestamp, which ircu2.10.12.12 now requires. This fixes a bug causing
+	ircu to return "need more parameters" to the service every time it
+	attempts to issue a GLINE or BADCHAN. This is backwards compatible with
+	u2.10.11 and has been tested successfully on both versions.
+
+	* Core/service.php: Update add_gline to accept a lastmod timestamp.
+
+	* Defense/ds.php: Update calls to add_gline to include lastmod timestamp.
+
+	* Operator/p10/handle_N.php: Update calls to add_gline to include lastmod
+	timestamp.
+
+	* Operator/commands/addgchan.php: Update calls to add_gline to include
+	lastmod timestamp.
+
+	* Operator/commands.gline.php: Update calls to add_gline to include
+	lastmod timestamp.
+
+	* Operator/commands/addgname.php: Update calls to add_gline to include
+	lastmod timestamp.
+
+	* Operator/commands/clearchan.php: Update calls to add_gline to include
+	lastmod timestamp.
+
+	* Operator/os.php: Update service_add_gline and all calls to add_gline to
+	include lastmod timestamp.
+
+Brian Cline	<brian@ircplanet.net>	2009-06-26
+
+	* Core/p10/handle_GL.php: Fix bug and PHP warning.
+
+	* Defense/p10/handle_P.php: Fix bug and PHP warning due to typo.
+
+	* Nickname/p10/handle_P.php: Fix bug and PHP warning due to typo.
+
+	* Operator/p10/handle_P.php: Fix bug and PHP warning due to typo.
+
+	* Stat/p10/handle_P.php: Fix bug and PHP warning due to typo.
+
+Brian Cline	<brian@ircplanet.net>	2009-06-26
+
+	* Defense/p10/handle_N.php: Use *@ip instead of *ident@ip for g-lines.
+	More reliable, and actually works.
+
+Brian Cline	<brian@ircplanet.net>	2009-06-26
+
+	* Core/service.php: Fix more stdout warnings. Not sure how these weren't
+	seen in testing.
+
+Brian Cline	<brian@ircplanet.net>	2009-06-26
+
+	* Core/service.php: Fix massive stdout errors due to rolling back new
+	event handling mechanisms.
+
+Brian Cline	<brian@ircplanet.net>	2009-06-26
+
+	* Defense/p10/handle_P.php: Fix broken command reporting.
+
+	* Stat/ss.php: Remove old-style command and event reporting methods. We
+	now have a Core-level method to take care of this more efficiently.
+
+	* Stat/p10/handle_P.php: Fix broken command reporting.
+
+Brian Cline	<brian@ircplanet.net>	2009-06-26
+
+	* Defense/ds: Fix incorrect script references.
+
+	* Defense/commands/access.php: Fix incorrect table name.
+
+	* Defense/commands/adduser.php: Fix incorrect table name.
+
+	* Defense/commands/ctcp_*.php: Added generic CTCP handlers to Defense
+	Service.
+
+	* Defense/commands/moduser.php: Fix incorrect table name.
+
+	* Defense/commands/remuser.php: Fix incorrect table name.
+
+	* Operator/os.ini: Since the Defense Service now performs the same types
+	of scanning we were doing in the Operator Service, turn this off in the OS
+	by default.
+
+	* Stat/commands/ctcp_*.php: Add generic CTCP handlers to Stats Service.
+
+	* Stat/commands/moduser.php: Fix incorrect table name.
+
+	* Stat/commands/remuser.php: Fix incorrect table name.
+
+Brian Cline	<brian@ircplanet.net>	2009-06-26
+
+	* Channel/commands.php: Revert the ACCESS channel parameter back to the
+	way it was since we now have a special case to handle ACCESS * in the
+	PRIVMSG handler.
+
+	* Channel/p10/handle_P.php: Make a special exception for the ACCESS *
+	command so we don't try to look up the '*' channel name automatically.
+
+	* Operator/p10/handle_M.php: Fixed the broken MODE log channel reporting;
+	turns out we weren't even detecting the right kinds of changes. We don't
+	log channel mode changes, only user mode changes. Fixed.
+
+	* Stat/p10/handle_M.php: Fixed broken MODE handler due to recent changes
+	in the Core-level MODE handler. This was causing crashes.
+
+Brian Cline	<brian@ircplanet.net>	2009-06-25
+
+	* Core/globals.php: Bump version to 1.3.0 in preparation for major
+	release.
+
+	* Channel/globals.php: Bump version to 1.6.0.
+
+	* Nickname/globals.php: Bump version to 1.4.0.
+
+	* Operator/globals.php: Bump version to 1.4.0.
+
+	* Stat/globals.php: Bump version to 1.0.3.
+
+	* Channel/commands/moduser.php: Now that user protection works, channel
+	admins can use MODUSER PROTECT to toggle a user's protection on or off.
+	Finally implemented here.
+
+	* Channel/commands/show.php: Fix a critical bug encountered when
+	enumerating the badchan list.
+
+	* Channel/p10/handle_M.php: Fix crash bug due to typo, and several
+	bugs that prevented user protection from functioning correctly.
+
+Brian Cline	<brian@ircplanet.net>	2009-06-25
+
+	* Core/bot.php: Fix a bug wherein the Bot::topic method was not
+	actually sending a topic change when we don't pass it the channel
+	timestamp. If one is not passed, it is easy to determine one. This bug
+	only affected networks with topic bursting enabled, which adds a
+	timestamp to the topic.
+
+	* Core/service.php: send_mode_line was sending the wrong variable to
+	sendf and parse_mode. Huge bug, but corrected. Works quite well now.
+	Also, modify perform_chan_user_mode is now using send_mode_line for
+	its outgoing mode processing. The rest of it needs to be removed
+	after it has been proven to run stably.
+
+	* Channel/commands/access.php: Fix a bug wherein ACCESS * username
+	would only show one access record if there were more than one result.
+	Also fix another crash bug due to a typo.
+
+Brian Cline	<brian@ircplanet.net>	2009-06-25
+
+	* Channel/commands.php: Revise the ACCESS command's argument list so 
+	that automatic channel lookups are not performed on it. This is
+	preventing the new admin-level multi-channel search feature from
+	working (i.e., "access * brian").
+
+	* Channel/p10/handle_P.php: Forgot to remove a print_r used in
+	debugging some new stuff.
+
+Brian Cline	<brian@ircplanet.net>	2009-06-18
+
+	* Core/service.php: Fix bugs in parse_mode that were somehow causing
+	PHP to crash (an actual segmentation fault, no warnings/errors/etc).
+	Turns out we weren't ignoring the ':' mode. Also, we weren't using
+	the right name nor method to obtain the relevant channel in parse_mode.
+
+	* Core/util_string.php: Fix a bug whereby irc_sprintf and irc_vsprintf
+	wouldn't pick up a conversion specifier if its type was the last
+	character in the format string. In other words a string with '... %A'
+	would not have been totally converted, as the 'A' would have been 
+	ignored.
+
+	* Channel/p10/handle_P.php: Use built-in Service::report_command
+	instead of manually doing it.
+
+	* Nickname/p10/handle_P.php: Use built-in Service::report_command
+	instead of manually doing it.
+
+Brian Cline	<brian@ircplanet.net>	2009-06-18
+
+	* Core/service.php: Temporarily roll back contained handler processing,
+	pretty much because it will break *everything* and should be slated for
+	1.3 or 2.0. Will require a huge time investment to adjust all the 
+	handlers. Also, fix typo causing immediate crash in send_mode_line.
+
+Brian Cline	<brian@ircplanet.net>	2009-06-18
+
+	* Core/service.php: This revision of the report_command function was
+	misplaced between two different checked-out versions of the source, and
+	never made it into a commit. Probably caused some very swift crashes.
+
+Brian Cline	<brian@ircplanet.net>	2009-06-13
+
+	* Core/service.php: Change send_mode to send_mode_line, and add send_mode
+	as a quick way to send a mode change with a source object or numeric, a
+	channel name, and a string with the mode change. Also, in send_mode_line,
+	append the channel timestamp if one is not provided, and pass along each
+	mode change line to parse_mode for internal processing.
+
+	* Core/bot.php: Modified Bot::mode to use the new send_mode method. So
+	much easier, and now keeps in-memory data structures accurate.
+
+Brian Cline	<brian@ircplanet.net>	2009-06-13
+
+	* Core/bot.php: Update Bot::noticef and Bot::messagef to use irc_vsprintf
+	rather than the stock vsprintf.
+
+	* Core/service.php: Clean up handler processing a little, to make it more
+	readable and more sensible. Now, a handler is executed in a container
+	method. The core now also has a single method to parse a mode change line,
+	whether it be incoming or outgoing, and update the necessary memory 
+	structures. Another new method, send_mode will examine an outgoing mode
+	string, break it up if it exceeds six modes, and send it along.
+
+	* Core/util_string.php: Add irc_vsprintf, which is equivalent to 
+	vsprintf but accepts the other new, IRC-specific formatting flags as 
+	irc_sprintf.
+
+	* Core/p10/handle_M: Gutted since we now have a function to handle all
+	mode changes in the core.
+
+	* Channel/p10/handle_M.php: Fix an interesting (bugless?) typo; we were
+	using the wrong argument for our source variable.
+
+	* Channel/p10/handle_P.php: Add command reporting upon successful command
+	execution.
+
+	* Channel/commands/show.php: Add a "BAD" option to the SHOW command, so
+	that admins may review the list of prohibited channel name masks.
+
+	* Channel/commands/verify.php: Add VERIFY command to allow users to
+	determine whether or not another user is a logged-in CS administrator.
+
+	* Channel/commands.php: Add the command definition for VERIFY.
+
+	* Nickname/p10/handle_P.php: Add command reporting upon successful command
+	execution.
+
+Brian Cline	<brian@ircplanet.net>	2009-06-09
+
+	* Channel/cs.php: Add the is_channel_registered() method to return 
+	whether or not a channel has been registered. Also added the 
+	get_active_channel_users() method, which will return an array of User 
+	objects that are logged in and have access to the specified channel.
+
+	* Channel/p10/handle_K.php: Inspect all kicks in registered channels, 
+	reversing any actions performed against protected users. In this case we 
+	issue a DEOP against the offending user and invite the victim back into 
+	the channel.
+
+	* Channel/p10/handle_M.php: Inspect all mode changes in registered 
+	channels, reversing any actions performed against protected users. In 
+	this case we issue a DEOP against the offending user and either re-op or 
+	re-voice the victim, or remove a ban that matches any superior, 
+	protected, logged-in user.
+
+Brian Cline	<brian@ircplanet.net>	2009-06-05
+
+	* Channel/commands/access.php: First go at allowing admins to specify a
+	channel wildcard in the ACCESS command, to locate all channels in which a
+	particular account may have access.
+
+	* Channel/db_channel.php: Fix a bug whereby the register_date field was
+	not being populated in the database.
+
+	* Operator/p10/handle_N.php: Fix a bug whereby clones on private IP
+	addresses were being g-lined. Typical users will not be on private IP
+	addresses so there is no real security risk here.
+
+	* Stat/timers/log_history.php: Fix bug causing PHP warnings to be thrown
+	as a variable was not initialized before use.
+
+Brian Cline	<brian@ircplanet.net>	2009-05-22
+
+	* Core/util_string.php: Completely rework irc_sprintf to make it more
+	efficient and easier to follow. Also add tons of inline documentation
+	to keep other developers sane.
+
+Brian Cline	<brian@ircplanet.net>	2009-05-22
+
+	* Core/service.php: Change include statements to reflect new convenience
+	function file names.
+
+	* Core/util_array.php: Moved array convenience functions to their own
+	file.
+
+	* Core/util_datetime.php: Moved date/time convenience functions to their
+	own file.
+
+	* Core/util_db.php: Renamed and formatted for consistency.
+
+	* Core/util_obj.php: Moved object convenience functions to their own file.
+
+	* Core/util_string.php: Renamed for consistency, trimmed down to
+	string-specific convenience functions, and rearranged to make more sense.
+
+Brian Cline	<brian@ircplanet.net>	2009-05-21
+
+	* Core/stringutils.php: Add is_server, is_account, is_gline functions to
+	test for various types of data structures. Added array_contains to return
+	whether or not an element is found in an array. Added irc_sprintf to allow
+	for sprintf style calls with custom flags for nick names, account names,
+	channel names, server names, server numerics, user numerics, and
+	space-delimited imploded arrays while only having to provide a reference
+	to the object as an additional argument as opposed to the result of an
+	object's method.
+
+	* Channel/p10/handle_J.php: Convert infoline format to use irc_sprintf.
+
+	* Operator/p10/handle_N.php: Convert reported JOIN event to use
+	irc_sprintf.
+
+Brian Cline	<brian@ircplanet.net>	2009-05-19
+
+	* Operator/p10/handle_P.php: Allow other services to issue gline commands
+	without having to be a global operator and without having an account.
+
+	* Operator/os.php: Correct documentation for DNSBL lookup and fix minor
+	code formatting issues. Remove debug message for private address exception
+	in DNSBL lookup as it gets repeated many times for each private-IP user.
+
+	* Operator/globals.php: Bump revision.
+
+Brian Cline	<brian@ircplanet.net>	2009-05-19
+
+	* Operator/os.php: Fix bugs that cropped up from testing the last few
+	changesets. New DNSBL checks appear to be working. Changed from
+	gethostbyname() to dns_get_record(), because on some systems the former
+	will take 2-3 seconds each lookup for addresses that do not resolve. The
+	latter takes a fraction of a second under normal conditions.
+
+Brian Cline	<brian@ircplanet.net>	2009-05-19
+
+	* Operator/os.php: Add a few more DNSBL services for checking open proxies
+	and otherwise compromised hosts, and reprioritize a few others.
+
+Brian Cline	<brian@ircplanet.net>	2009-05-19
+
+	* Operator/os.ini: Add options for new compromised host scanning.
+
+	* Operator/os.php: Add capabilities to check a number of DNSBL blacklist
+	services to see if connecting users are running on compromised hosts. Also
+	retooled Tor DNSBL check to use the generic DNSBL check function.
+
+	* Operator/p10/handle_N.php: If COMP_GLINE is defined and enabled, run the
+	compromised host check on any connecting user.
+
+Brian Cline	<brian@ircplanet.net>	2008-01-24
+
+	* Channel/db_channel.php: Fixed a bug preventing channel bans from
+	being removed from the database.
+
+Brian Cline	<brian@ircplanet.net>	2008-12-21
+
+	* Nickname/globals.php: Bump version to 1.3.13.
+
+	* Nickname/ns.php: Bug fix - reop NS when it is deopped from its log
+	channel as the result of a burst.
+
+	* Nickname/ns.ini: Add new reporting channel options and make the
+	other settings more generic.
+
+	* Channel/commands/show.php: Add the SHOW command for CS.
+
+	* Channel/commands/adminlist.php: Removed due to obsolesence (the SHOW
+	command now performs this task).
+
+	* Channel/cs.ini: Add new reporting channel options and make the other
+	settings more generic.
+
+	* Channel/commands.php: Remove adminlist, add show.
+
+	* Channel/globals.php: Bump version to 1.5.10.
+
+	* Core/p10.php: Fix FMT_SERVER_SELF not having a spot to put in a
+	custom MAXUSERS amount. Also added P10's JUPE formats and the account
+	and away lines for WHOIS responses.
+
+	* Core/core_globals.php: Bump version to 1.2.0.
+
+	* Core/service.php: Add jupe tracking code and updated to reflect
+	different log channel options. Also fixed a longstanding bug whereby
+	no services sent the correct MAXUSERS in their server handshake line.
+	They were sending the max (262144) but now send whatever is specified
+	in server_maxusers in the service ini file.
+
+	* Core/jupe.php: Add jupe class.
+
+	* Core/p10/handle_JU.php: Add JU token handler for jupes.
+
+	* Core/p10/handle_W.php: Add code to send account and away lines where
+	appropriate in remote whois responses.
+
+	* Core/timers/expire_jupes.php: Added to remove jupes when they
+	expire.
+
+	* Operator/globals.php: Bump version to 1.3.0.
+
+	* Operator/os.ini: Add new reporting channel options and make the
+	other settings more generic.
+
+	* Operator/commands/inviteme.php: Send invites for both log channels
+	now, instead of just the old log channel.
+
+	* Operator/commands/jupe.php: Add JUPE command.
+
+	* Operator/commands/unjupe.php: Add UNJUPE command.
+
+	* Operator/commands/show.php: Add ability to list jupes, and a
+	catch-all error when an invalid option is specified.
+
+	* Operator/os.php: Added jupe-saving code, which will keep all jupes
+	in a database until they expire. This ensures jupes, just like glines,
+	will always be enforced between OS sessions. Modified OS to queue and
+	then send all network events it sees before end-of-burst, to be sent
+	to the event channel after burst. Modified the reporting code to send
+	commands and events to their appropriate channels.
+
+	* Operator/commands.php: Add JUPE and UNJUPE to command list.
+
+	* Operator/db_jupe.php: Added DB_Jupe class, to maintain jupes in the
+	services database.
+
+	* Stat/globals.php: Bump version to 1.0.2.
+
+	* Stat/ss.ini: Add new reporting channel options and make the other
+	settings more generic.
+
+	* Stat/ss.php: Make sure we reop SS if it is deopped in its log
+	channel as the result of a burst.
+
+Brian Cline	<brian@ircplanet.net>	2008-12-17
+
+	* Core/core_globals.php: Bump version.
+
+	* Core/p10/handle_GL.php: Fix a bug causing a warning and preventing
+	the core from detecting when a gline was being removed.
+
+Brian Cline	<brian@ircplanet.net>	2008-12-17
+
+	* Core/stringutils.php: Added is_private_ip function, which calculates
+	whether or not a given IP address is in an IANA-declared private
+	range.
+
+	* Operator/commands/show.php: Clear up an annoying PHP warning about
+	non-existent array indices.
+
+	* Operator/timers/reload_tor_hosts.php: Removed since we now use a Tor
+	DNSBL.
+
+	* Operator/download_tor_hosts: Removed since we now use a Tor DNSBL.
+
+	* Operator/globals.php: Bump version and remove old Tor host file
+	define.
+
+	* Operator/os.php: Remove old Tor checking code and implement the new
+	Tor DNSBL checking code, courtesy of the public Tor DNSBL at
+	tor.dnsbl.sectoor.de (http://www.sectoor.de/tor.php).
+
+	* Operator/tor-hosts.txt: Removed since we now use a DNSBL for Tor
+	checks.
+
+Brian Cline	<brian@ircplanet.net>	2008-12-15
+
+	* db_schema.sql: Added table definitions for all the new badchan and
+	badnick features. Forgot these in a recent commit.
+
+Brian Cline	<brian@ircplanet.net>	2008-12-15
+
+	* Operator/timers/reload_tor_hosts.php: Add a timer to automatically
+	check for updates to the Tor hosts list and reload when there's been a
+	modification. This is handy since we've got a cron job updating the
+	file in the background every so often.
+
+	* Operator/os.php: Add a 60-second recurring timer to check for Tor
+	hosts file modifications.
+
+	* Operator/globals.php: Bump version to 1.2.2.
+
+Brian Cline	<brian@ircplanet.net>	2008-12-15
+
+	* Channel/globals.php: Forgot to bump version.
+
+	* Nickname/globals.php: Forgot to bump version.
+
+Brian Cline	<brian@ircplanet.net>	2008-12-15
+
+	* Channel/commands/join.php: How embarrassing... forgot to add this
+	several revisions ago.
+
+	* Channel/commands/part.php: Forgot to add this several revisions ago. 
+
+Brian Cline	<brian@ircplanet.net>	2008-12-14
+
+	* Nickname/commands/addbad.php: Add the ADDBAD command.
+
+	* Nickname/commands/rembad.php: Add the REMBAD command.
+
+	* Nickname/commands/register.php: Check to see if a nick is in the
+	badnicks list before allowing it to be registered.
+
+	* Nickname/commands.php: Add the ADDBAD and REMBAD command lines.
+
+	* Nickname/ns.php: Add badnick helper functions.
+
+	* Nickname/db_badnick.php: Add the DB_BadNick class.
+
+	* Channel/commands/addbad.php: Add the ADDBAD command.
+
+	* Channel/commands/rembad.php: Add the REMBAD command.
+
+	* Channel/commands/register.php: Check to see if a channel is in the
+	badchan list before allowing it to be registered. Also fixed a bug
+	where CS was not getting opped after a user uses the REGISTER command
+	to register their channel.
+
+	* Channel/commands.php: Add the ADDBAD and REMBAD command lines.
+
+	* Channel/cs.php: Add the badchan helper functions.
+
+	* Channel/db_badchan.php: Add the DB_BadChan class.
+
+Brian Cline	<brian@ircplanet.net>	2008-12-09
+
+	* Channel/p10/handle_I.php: Inviting CS to a channel is no longer
+	solely for CS admins. If a user has access to a channel that is at
+	least as high enough to issue the JOIN command, then CS will accept
+	the invite and join the channel. This still works for admins as well.
+
+	* Channel/commands/register.php: Require users to be opped in a
+	channel they are attempting to register.
+
+	* Channel/globals.php: Bump version to 1.5.8.
+
+Brian Cline	<brian@ircplanet.net>	2008-12-09
+
+	* Channel/globals.php: Forgot to bump version for last CS commit.
+
+Brian Cline	<brian@ircplanet.net>	2008-12-09
+
+	* db_schema.sql: Remove hardcoded autoincrement values. I knew I was
+	forgetting something when I initially committed this file.
+
+Brian Cline	<brian@ircplanet.net>	2008-12-09
+
+	* Channel/commands/clearbans.php: Check if we're in the channel first.
+
+	* Channel/commands/kickbanall.php: Check if we're in the channel first.
+
+	* Channel/commands/voiceall.php: Check if we're in the channel first.
+
+	* Channel/commands/ban.php: Check if we're in the channel first.
+
+	* Channel/commands/do.php: Check if we're in the channel first.
+
+	* Channel/commands/voice.php: Check if we're in the channel first.
+
+	* Channel/commands/devoiceall.php: Check if we're in the channel first.
+
+	* Channel/commands/opall.php: Check if we're in the channel first.
+
+	* Channel/commands/kickall.php: Check if we're in the channel first.
+
+	* Channel/commands/topic.php: Check if we're in the channel first.
+
+	* Channel/commands/clearmodes.php: Check if we're in the channel first.
+
+	* Channel/commands/kick.php: Check if we're in the channel first.
+
+	* Channel/commands/say.php: Check if we're in the channel first.
+
+	* Channel/commands/invite.php: Check if we're in the channel first.
+
+	* Channel/commands/moderate.php: Check if we're in the channel first.
+
+	* Channel/commands/kickban.php: Check if we're in the channel first.
+
+	* Channel/commands/unban.php: Check if we're in the channel first.
+
+	* Channel/commands/rdefmodes.php: Check if we're in the channel first.
+
+	* Channel/commands/devoice.php: Check if we're in the channel first.
+
+	* Channel/commands/op.php: Check if we're in the channel first.
+
+	* Channel/commands/rdeftopic.php: Check if we're in the channel first.
+
+	* Channel/commands/deopall.php: Check if we're in the channel first.
+
+	* Channel/commands/mode.php: Check if we're in the channel first.
+
+	* Channel/commands/deop.php: Check if we're in the channel first.
+
+	* Channel/commands.php: Add the JOIN and PART commands to the
+	command map.
+
+	* Core/p10.php: Removed some old debug messages.
+
+	* Core/p10/handle_J.php: Fix a crash bug where ircu was sending J
+	messages for channels that don't exist. This is due to the zombie
+	channel feature (and the +A mode) in u2.10.12 in which a channel can
+	exist either 5 minutes or 48 hours after the last user /parts it. In 
+	such a case, ircu sends a J instead of a C. Silly, but must work 
+	around it.
+
+	* Core/bot.php: Modify Bot::join to account for channels that may not
+	exist yet. If not, pretend this is a create() function and allocate
+	everything in memory first.
+
+Brian Cline	<brian@ircplanet.net>	2008-12-07
+
+	* Operator/globals.php: Forgot to bump version to 1.2.1 in last
+	commit.
+
+Brian Cline	<brian@ircplanet.net>	2008-12-07
+
+	* Operator/commands/show.php: Added the SHOW command, which accepts
+	BAD, CLONES, GLINES, and OPERS as arguments.
+
+	* Operator/commands.php: Added the SHOW command details to the command
+	map.
+
+	* Operator/db_badchan.php: Added an implicit string conversion to the
+	DB_BadChan class.
+
+Brian Cline	<brian@ircplanet.net>	2008-12-01
+
+	* Operator/db_badchan.php: Fix a bug where OS considers every channel
+	to be a bad channel.
+
+Brian Cline	<brian@ircplanet.net>	2008-11-29
+
+	* db_schema.sql: Forgot to add the table definition for badchans.
+	
+Brian Cline	<brian@ircplanet.net>	2008-11-29
+	
+	* Core/bot.php: Convert messagef and noticef to use vsprintf.
+
+	* Core/core_globals.php: Convert debugf to use vsprintf. Bump version
+	to 1.1.9.
+
+	* Core/dbutils.php: Convert db_queryf to use vsprintf.
+
+	* Core/service.php: Convert sendf to use vsprintf.
+
+	* Core/stringutils.php: Added is_channel to determine if a variable is
+	a Channel object.
+
+	* Operator/commands/addbad.php: Add the ADDBAD command, which allows
+	opers to add a word to the badchan list. When a channel is created
+	and contains any words in the badchan list, it is automatically set
+	with +s and enforced.
+
+	* Operator/commands/rembad.php: Add the REMBAD command, which allows
+	opers to remove a word from the badchan list.
+
+	* Operator/p10/handle_B.php: Automatically set +s on any badchan
+	channels when received in the burst.
+
+	* Operator/p10/handle_C.php: Automatically set +s on any badchan
+	channels when a user creates it.
+
+	* Operator/p10/handle_M.php: Enforce any +s modes set on a badchan
+	channel.
+
+	* Operator/commands.php: Add the ADDBAD and REMBAD command info.
+
+	* Operator/globals.php: Bump version to 1.2.0.
+
+	* Operator/db_badchan.php: Add the DB_BadChan class, responsible for
+	badchan DB interop and matching.
+
+	* Operator/os.php: Implement badchan structures and necessary
+	functions.
+
+Brian Cline	<brian@ircplanet.net>	2008-11-29
+
+	* Core/core_globals.php: Bump version.
+
+	* Core/service.php: Added get_clone_count, which returns the number of
+	connections from a specific IP address (the clone count).
+
+	* Operator/os.ini: Added the new clone glining options. If enabled, OS
+	will gline an IP address if the number of clients from a single IP
+	exceeds clone_max. It will set the gline for gline_duration and the
+	client will see the gline_reason when they are disconnected.
+
+	* Operator/p10/handle_N.php: Implement clone g-lining and clean up the
+	Tor g-lining code to use the Service::add_gline member.
+
+	* Operator/os.php: Validate clone g-lining options on startup and fix
+	a bug causing Tor g-lining not to work (we weren't loading the
+	hosts list at startup...)
+
+Brian Cline	<brian@ircplanet.net>	2008-11-28
+
+	* LICENSE: Add project name to license file.
+
+	* (all php files): Add license declaration to the top of each source
+	code file.
+
+Brian Cline	<brian@ircplanet.net>	2008-11-28
+
+	* Channel/commands/set.php: Fix a critical crash bug, caused by a
+	simple typo.
+
+	* Channel/p10/handle_O.php: Implemented a rough first iteration of the
+	service-to-service notification. This occurs through NOTICEs to the
+	bot.
+
+	* Channel/timers/expire_channels.php: Fix a critical crash bug when we
+	can no longer find a user account for a channel access record. This
+	never occurred before, but it is here as a safety net anyway and also
+	because the new notification system needs more testing.
+
+	* Channel/cs.php: Use the new is_user function where necessary.
+
+	* Channel/db_channel.php: When removing channel access from a user,
+	also remove the channel access record in the database.
+
+	* Channel/globals.php: Bump version.
+
+	* Core/p10/handle_O.php: Add a blank handler for O (NOTICE) so that we
+	don't get any "No core handler" warnings in the log when a service
+	receives notices.
+
+	* Core/bot.php: Use the new is_user function where necessary.
+
+	* Core/core_globals.php: Define constants for use in the notification
+	system. Bump version.
+
+	* Core/service.php: Declare the default_bot member before use. Use the
+	new is_user function where necessary. Also added load_single_account
+	and remove_account functions for use in the notification service, as
+	well as implemented the outbound notification itself. This is at the
+	core level, so any service can use it.
+
+	* Core/stringutils.php: Added is_user, which makes for much cleaner
+	code when we need to check if an object is the User class (or Bot
+	class, as it extends the User class).
+
+	* Nickname/commands/drop.php: Added the DROP command file. This will
+	allow NS admins to drop an account from the accounts database. As soon
+	as the drop occurs, NS sends a notification to all other services
+	(users with umode +k) on the network. Those other services only accept
+	this notification from other +k users and perform any cleanup
+	necessary to its own purpose (i.e., a channel service checks for any
+	channels owned or with access and removes those records.)
+
+	* Nickname/commands.php: Add the drop command info.
+
+	* Nickname/globals.php: Bump version.
+
+	* Nickname/ns.ini: Add an option for the new drop command that, when
+	set to true, will not drop or purge any accounts that owns channels in
+	CS. If this is not enabled, NS simply notifies CS of the deleted
+	account and CS purges all owned channels and removes access records
+	in channels where the account has access.
+
+	* Operator/commands/addgchan.php: Add the ADDGCHAN command, which adds
+	a badchan/glined-channel. This is a feature from u2.10.11 and up.
+	Channels that are gchanned can only be entered by opers; users will be
+	told that they are banned from the channel. They work exactly like
+	regular g-lines and take a duration and reason.
+
+	* Operator/commands/addgname.php: Add the ADDGNAME command, which adds
+	a gline based on realnames. This is a feature in u2.10.11 and up.
+	These work exactly like regular g-lines and take a duration and
+	reason.
+
+	* Operator/commands/remgchan.php: Add the REMGCHAN command, which
+	removes a badchan/glined-channel.
+
+	* Operator/commands/remgname.php: Add the REMGNAME command, which
+	removes a realname-based gline.
+
+	* Operator/commands.php: Add command info for ADDGCHAN, ADDGNAME,
+	REMGCHAN, REMGNAME.
+
+	* Operator/globals.php: Bump version.
+
+	* Operator/os.php: Use the new is_user function where necessary.
+
+	* Stat/ss.php: Use the new is_user function where necessary.
+
+Brian Cline	<brian@ircplanet.net>	2008-11-24
+
+	* LICENSE: Added the new BSD license.
+
+	* Core/timers/refresh_data.php: Fixed a huge bug causing lots of DB
+	traffic. Oops. Also removed some unnecessary debug messages.
+
+	* Operator/download_tor_hosts: Forgot to reflect the tor-hosts file
+	rename here.
+
+	* Stat/p10/handle_J.php: Fixed a crash bug.
+
+	* Stat/p10/handle_L.php: Fixed a crash bug.
+	
+Brian Cline	<brian@ircplanet.net>	2008-11-23
+
+	* Core/core_globals.php: Bump version to 1.1.6.
+
+	* Core/timers/refresh_data.php: Fix typo causing a crash.
+
+Brian Cline	<brian@ircplanet.net>	2008-11-23
+
+	* db_schema.sql: Missing a semicolon... whoops.
+
+	* Channel/globals.php: Bump version to 1.5.5.
+
+	* Channel/cs.php: Fixed a huge, very important bug. In some instances,
+	CS was not treating channel names with case insensitivity. As a
+	result, issuing 'showcommands #test' and 'showcommands #Test' would
+	yield different results. Some level-checking and channel-locating
+	functions weren't using the case-insensitive version of the name
+	despite its already being there. The fix here appears to resolve the
+	issue.
+
+Brian Cline	<brian@ircplanet.net>	2008-11-23
+
+	* .: Added svn:ignore entries for some miscellaneous files.
+
+	* db_schema.sql: Attempt to resolve insert errors on some versions of
+	MySQL when the default date was not specified and none were provided.
+
+Brian Cline	<brian@ircplanet.net>	2008-11-23
+
+	* .,Channel,Operator,Nickname,Stat: Added svn:ignore entries for the
+	log files and other miscellaneous files.
+
+	* Channel/globals.php: Bump version to 1.5.4 for last commit.
+
+	* Core/db_record.php: Hide query debugging.
+
+	* Core/core_globals.php: Bump version to 1.1.5.
+
+	* Nickname/globals.php: Bump version to 1.3.10 for last commit.
+
+	* Operator/commands/access.php: Add the ACCESS command file for
+	displaying the service's internal user list.
+
+	* Operator/commands/adduser.php: Remove query debugging.
+
+	* Operator/commands.php: Add the ACCESS command definition.
+
+	* Operator/globals.php: Bump version to 1.1.4.
+
+	* Stat/commands/access.php: Add the ACCESS command file for displaying
+	the service's internal user list.
+
+	* Stat/commands/adduser.php: Remove query debugging.
+
+	* Stat/commands.php: Add ACCESS command definition.
+
+	* Stat/globals.php: Bump version to 1.0.1.
+
+Brian Cline	<brian@ircplanet.net>	2008-11-23
+
+	* Nickname/commands/set.php: Fix duplicate define reference. Also add
+	the ability for admins to use SET SUSPEND on an account to suspend its
+	use.
+
+	* Nickname/commands/login.php: Do not allow users to log in if their
+	account has been suspended.
+
+	* Nickname/globals.php: Remove two defines that were already in the
+	DB_User class definition.
+
+	* Channel/timers/expire_channels.php: Remove an odd undefined
+	reference that was causing PHP warnings.
+
+	* Channel/db_channel.php: Fix a PHP warning for an undefined
+	reference.
+
+	* Core/timers/refresh_data.php: Fix a PHP warning for undefined
+	references on persisted timer data.
+
+Brian Cline	<brian@ircplanet.net>	2008-11-22
+
+	* Operator/tor-hosts: A fresh list... why not commit. Also, renamed
+	with a .txt extension. This really should have been on there before,
+	but the operator service is looking for the file with a .txt
+	extension. It makes more sense to have it.
+
+Brian Cline	<brian@ircplanet.net>	2008-11-22
+
+	* Channel/commands/showcommands.php: Major optimization to this
+	command. Should definitely increase speed of the response.
+
+	* Channel/commands.php: Add command definitions for ADDADMIN,
+	DELADMIN, and ADMINLIST. These commands allow administrators to manage
+	the administrator access list.
+
+	* Channel/globals.php: Bump version 1.5.2 => 1.5.3.
+
+	* Core/core_globals.php: Bump version 1.1.3 => 1.1.4.
+
+	* Core/service.php: Major optimizations related to the SHOWCOMMANDS
+	command. We sort each line of the command's output and reverse sort it
+	by level whenever the commands are loaded, rather than doing it each
+	time SHOWCOMMANDS is received.
+
+	* Nickname/commands/showcommands.php: Major optimization to this
+	command. Should definitely increase speed of the response.
+
+	* Nickname/globals.php: Bump version 1.3.8 => 1.3.9.
+
+	* Operator/commands/showcommands.php: Major optimization to this
+	command. Should definitely increase speed of the response.
+
+	* Operator/globals.php: Bump version 1.1.2 => 1.1.3.
+
+	* db_schema.php: Add help for the ADDADMIN, DELADMIN, and ADMINLIST
+	commands.
+
+Brian Cline	<brian@ircplanet.net>	2008-11-20
+
+	* db_schema.sql: Added help for new NS info command.
+
+	* Nickname/commands/info.php: Added new info command to NS to display
+	detailed information about a user account.
+
+	* Nickname/commands/register.php: Just in case -- set the deprecated 
+	register_ts.
+
+	* Nickname/commands.php: Add command entry for the new info command.
+
+	* Core/db_user.php: Return the new timestamp for register time /
+	create date. Also add a set_register_ts just in case.
+
+Brian Cline	<brian@ircplanet.net>	2008-11-19
+
+	* Core/core_globals.php: Bumped version 1.1.2 => 1.1.3.
+
+	* Operator/globals.php: Bumped version 1.1.1 => 1.1.2.
+
+	* Operator/os.php: Remove extraneous debugging output.
+
+Brian Cline	<brian@ircplanet.net>	2008-11-19
+
+	* Core/service.php: Add child-level event hooks for adding and
+	removing glines. If implemented in a child class, these will be called
+	automagically from the parent.
+
+	* Core/p10/handle_B.php: Remove an extraneous print_array.
+
+	* Operator/os.php: Implemented database storage of g-lines so that
+	they can be persisted across sessions. Upon startup, the service will
+	burst all glines to its uplink to ensure they are all being enforced.
+
+	* Operator/db_gline.php: Implementation of the database-level Gline
+	class.
+
+	* db_schema.sql: Added the os_glines table to store gline information.
+
+Brian Cline	<brian@ircplanet.net>	2008-11-19
+
+	* (all): Converted source files from DOS to UNIX linebreak formats.
+
+Brian Cline	<brian@ircplanet.net>	2008-11-19
+
+	* (all): Removed executable flag from non-executable files.
+
+Brian Cline	<brian@ircplanet.net>	2008-11-19
+
+	* Operator/commands/topic.php: Somehow this never made it into the
+	trunk. Oops.
+
+	* Operator/globals.php: Bumped version 1.1.0 => 1.1.1.
+
+Brian Cline	<brian@ircplanet.net>	2008-11-19
+
+	* Nickname/globals.php: Bumped version 1.3.7 => 1.3.8.
+
+	* Channel/globals.php: Bumped version 1.5.1 => 1.5.2.
+
+	* Channel/commands/rdeftopic.php: Fixed broken command. Topic never
+	got changed in the actual channel.
+
+	* Channel/commands/register.php: Fixed the root of the missing
+	creation TS bug, causing CS to burst channels with a zero timestamp
+	upon startup. This will obviously cause problems with ircu when
+	sending mode hacks and other change messages. Fortunately, not any
+	more.
+
+	* Channel/cs.php: Another part of the zero-TS bug mentioned above. If
+	we don't have a create TS on record, use the register TS.
+
+	* Channel/db_channel.php: Added set_register_date member function.
+
+	* Core/core_globals.php: Bump version 1.1.1 => 1.1.2. Also added
+	CORE_VENDOR constant to be included with the core services version (as
+	seen in CTCP version replies).
+
+	* Core/dbutils.php: Moved db_date to where it really belongs and made
+	it act more like PHP's date(), where the timestamp argument is
+	optional.
+
+	* Core/stringutils.php: Moved db_date to where it really belongs.
+
+Brian Cline	<brian@ircplanet.net>	2008-11-19
+
+	* Core/service.php: Hide timer debug messages and fix old DB_User
+	constructor behavior.
+
+	* Core/db_user.php: We no longer need to attempt to set initial data
+	on a new DB_User.
+
+	* Core/db_record.php: Remove an unnecessary debug message.
+
+	* Nickname/commands/register.php: Fixed a few typos causing a hard
+	crash.
+
+Brian Cline	<brian@ircplanet.net>	2008-11-19
+
+	* Channel/cs: Fix stderr/stdout redirection in some versions of sh.
+	
+	* Nickname/ns: Fix stderr/stdout redirection in some versions of sh.
+	
+	* Operator/os: Fix stderr/stdout redirection in some versions of sh.
+	
+	* Stat/ss: Fix stderr/stdout redirection in some versions of sh.
+	
+Brian Cline	<brian@ircplanet.net>	2008-11-19
+
+	* Core/timers/refresh_data.php: Attempting to resolve a critical bug
+	where a user's account is not recognized by other services the first
+	time it is created. This is because the AC message usually comes
+	through from the other service before we've loaded the DB record. When
+	this occurs, we weren't checking for any users whose account name was
+	set but whose account ID was not set. This should hopefully fix the
+	problem.
+
+Brian Cline	<brian@ircplanet.net>	2008-11-19
+
+	* db_schema.sql: Forgot to include the help text for all services.
+
+Brian Cline	<brian@ircplanet.net>	2008-11-18
+	
+	* Channel/globals.php: Bumped version 1.5.0 => 1.5.1.
+
+	* Core/globals.php: Bumped version 1.1.0 => 1.1.1.
+
+	* Nickname/globals.php: Bumped version 1.3.6 => 1.3.7.
+
+	* Channel/cs.ini: Match db_name against database name in
+	db_schema.sql.
+
+	* Nickname/ns.ini: Match db_name against database name in
+	db_schema.sql.
+
+	* Operator/os.ini: Match db_name against database name in
+	db_schema.sql.
+
+	* Stat/ss.ini: Match db_name against database name in
+	db_schema.sql.
+
+	* db_schema.sql: Added script to use for mysql imports. Not sure why
+	this wasn't included in the first release, but here it is
+	nonetheless...
+
+	* Nickname/commands/register.php: Adjustment and bug fix involving
+	class member visibility.
+
+	* Channel/commands/access.php: Adjustments for class member
+	visibility.
+
+	* Channel/commands/moduser.php: Reduced unnecessary DB traffic when
+	saving channel access information.
+
+	* Channel/commands/adduser.php: Adjustments and bug fix involving
+	class member visibility.
+
+	* Channel/timer/expire_channels.php: Removed old code that had already
+	been commented out long ago.
+
+	* Channel/db_channel.php: Minor bug fix causing STDOUT output and the
+	forgotten addition of get_url and set_url.
+
+	* Channel/cs.php: Added a check to make sure a channel could be loaded
+	when we are looking for loading channel access records. Removed unused
+	code and also made minor adjustments involving class member
+	visibility.
+
+	* Core/service.php: Fixed a bug whereby timers would be skipped and
+	never heard from again. This would definitely have been observed on
+	any server that has its time adjusted periodically, as is typical with
+	a crontab running ntpdate. Also added some debug messages to verify
+	timers are not being lost.
+
+	* Core/timers/refresh_data.php: Fixed a major bug whereby new accounts
+	were not being loaded. Oops.
+
+	* Core/db_user.php: Added a set_name member function.
+
+	* Operator/tor-hosts: Updated the list.
+
+	* Operator/download_tor_hosts: Added this shell script so folks could
+	run it in a crontab to have their tor hosts file automagically
+	updated for the tor host g-lining feature. A restart is NOT necessary
+	after updating the tor hosts file.
+
+Brian Cline	<brian@ircplanet.net>	2007-11-24
+
+	* Nickname/globals.php: Bumped version 1.3.5 => 1.3.6.
+
+	* Channel/globals.php: Bumped version 1.4.6 => 1.5.0.
+
+	* Core/globals.php: Bumped version 1.0.10 => 1.1.0.
+
+	* Operator/globals.php: Bumped version 1.0.1 => 1.1.0.
+
+	* Nickname/commands/set.php: Added ability for service admins to
+	modify other users' accounts with the SET command. Cleaned up debugs.
+
+	* Channel/p10/handle_I.php: Added the ability for service admins to
+	invite the channel service back into a channel when, for whatever
+	reason, it is no longer in there.
+
+	* Channel/commands/dumpall.php: Don't output everything in memory as
+	it gets large rather quickly. Just do accounts since that's all we
+	really use this for.
+
+	* Channel/commands/ban.php: Remove old debug messages and make ban
+	initialization easier to read.
+
+	* Channel/commands/dumpuser.php: Prevent PHP error/warning messages
+	from being generated when an array index (account name) doesn't exist.
+
+	* Channel/commands/topic.php: Remove old debug messages.
+
+	* Channel/commands/kick.php: Prevent users from using the channel
+	service to kick other services from a channel.
+
+	* Channel/commands/chaninfo.php: Added the CHANINFO command to provide
+	basic information about a channel.
+
+	* Channel/commands/set.php: Add the NOPURGE option for service admins
+	to mark a channel as never expiring.
+
+	* Channel/commands/acctreload.php: Add the ACCTRELOAD command for
+	developer-level debugging. This forces the service to reload an
+	account from the database.
+
+	* Channel/commands/register.php: Fix assanine typo that was probably
+	used for testing. This caused users to be able to register up to MAX+8
+	channels.
+
+	* Channel/timers/save_data.php: This is no longer necessary since we
+	now save all data whenever it is updated.
+
+	* Channel/timers/expire_channels.php: Fix loop to use OO-friendly
+	accessor.
+
+	* Channel/db_channel.php: Modified to inherit new DB_Record class,
+	which provides DB-level operations and a slick way of developing
+	record-based classes. This makes life much easier. Also make all known
+	members protected so that they cannot be directly accessed. The record
+	constructor is also more flexible now and can accept just a name, or a
+	name and owner account ID.
+
+	* Channel/db_channel_access.php: Modified to inherit new DB_Record
+	class. Also made things more OO-compliant.
+
+	* Channel/commands.php: Fix some minor spacing issues, and add the
+	CHANINFO command.
+
+	* Channel/db_ban.php: Modified to inherit new DB_Record class. Also
+	made things more OO-compliant.
+
+	* Channel/cs.php: Minor reworks to constructors and debug messages.
+	Removed the refresh_data timer since it is now part of the core.
+	Removed old commented lines and debug messages and fixed some mode
+	reconciliation issues. Also made minor OO-related changes in line with
+	the changes to each class.
+
+	* Core/core_globals.php: Added the debugf function, which acts exactly
+	like printf.
+
+	* Core/service.php: Added a core-level timer to refresh any changed DB
+	data. We only refresh data that has changed since the last refresh, to
+	save on nasty overhead. Also removed old debug messages.
+
+	* Core/ban.php: Removed old debug messages.
+
+	* Core/dbutils.php: Removed old debug messages. Added a new db_queryf
+	function that accepts a query in sprintf format. Also added an
+	affected-row count to the query logger.
+
+	* Core/channeluser.php: Initialize modes to 0. Don't know if this
+	fixed any bugs or not, but it should have been this way a long time
+	ago.
+
+	* Core/channel.php: Added a function to clear all bans.
+
+	* Core/p10/handle_B.php: Fixed some bugs in the channel burst
+	reconciliation process, and removed some needless stuff.
+
+	* Core/p10/handle_I.php: Add some basic variables so services can use
+	them by name rather than argument number.
+
+	* Core/p10/handle_J.php: Add a basic convenience variable for services
+	to use.
+
+	* Core/p10/handle_N.php: Add convenience variable to show whether the
+	nick NICK line is a new or existing user.
+
+	* Core/p10/handle_S.php: Remove old debug message and add a
+	convenience variable for the new server object.
+
+	* Core/p10/handle_SERVER.php: Add convenience variable for the new
+	server object.
+
+	* Core/timers/refresh_data.php: Heavily modified to reload only
+	recently modified data -- that is, any data that has changed since our
+	last refresh check.
+
+	* Core/timer.php: Modified to always provide and store timer data as
+	an array.
+
+	* Core/db_user.php: Modified to inherit new DB_Record class. Also made
+	things more OO-compliant.
+
+	* Core/db_record.php: Added to provide an abstraction layer between
+	record-centric classes and across-the-board record operations
+	(create/update/read/delete). This is truly a life saver.
+
+	* Core/bot.php: Removed old debug messages.
+
+	* Core/stringutils.php: Removed old debug messages. Added support for
+	year durations. Also added a db_date function that works like date
+	except returns the format we need for our DATETIME database fields.
+
+	* Operator/os.ini: Added preferences for the new Tor glining feature.
+	Admins can now specify a text file that contains one IP address or
+	hostname per line that represents a Tor node. The operator service
+	will read in this list and automatically gline any users connecting
+	from any IP/host in the list. This is mean, sure, but Tor is often
+	used by malicious users in order to quickly and very easily circumvent
+	glines, channel bans, cloning restrictions, etc.
+
+	* Operator/p10/handle_T.php: Removed old debug messages.
+
+	* Operator/commands/set.php: Removed old debug messages.
+
+	* Operator/tor-hosts: Added an example of a Tor host list file, to be
+	used with the new Tor glining capabilities in the operator service.
+
+	* Operator/os.php: Added code to verify and load all Tor preferences.
+
+	* Operator/globals.php: Added global variable for the Tor hosts file
+	name.
+
+	* Stat/p10/handle_A.php: Added AWAY handler.
+
+	* Stat/p10/handle_B.php: Added burst handler.
+
+	* Stat/p10/handle_C.php: Added channel create handler.
+
+	* Stat/p10/handle_AC.php: Added user account update handler.
+
+	* Stat/p10/handle_SQ.php: Added SQUIT handler.
+
+	* Stat/p10/handle_D.php: Added kill handler.
+
+	* Stat/p10/handle_J.php: Added join handler.
+
+	* Stat/p10/handle_K.php: Added kick handler.
+
+	* Stat/p10/handle_L.php: Added part handler.
+
+	* Stat/p10/handle_M.php: Added mode handler.
+
+	* Stat/p10/handle_N.php: Added nick handler.
+
+	* Stat/p10/handle_P.php: Added private message handler.
+
+	* Stat/p10/handle_Q.php: Added quit handler.
+
+	* Stat/p10/handle_S.php: Added server handler.
+
+	* Stat/p10/handle_T.php: Added topic handler.
+
+	* Stat/p10/handle_V.php: Added remote version handler.
+
+	* Stat/p10/handle_SERVER.php: Added uplink server handler.
+
+	* Stat/commands/quote.php: Added quote command to pass raw privmsg
+	data on as actual IRCu P10-n2k protocol.
+
+	* Stat/commands/moduser.php: Added moduser command.
+
+	* Stat/commands/inviteme.php: Added inviteme command.
+
+	* Stat/commands/die.php: Added die command.
+
+	* Stat/commands/remuser.php: Added remuser command.
+
+	* Stat/commands/showcommands.php: Added showcommands command.
+
+	* Stat/commands/uptime.php: Added uptime command.
+
+	* Stat/commands/adduser.php: Added adduser command.
+
+	* Stat/commands/help.php: Added help command.
+
+	* Stat/ss.ini: Added configuration file.
+
+	* Stat/timers/log_history.php: Added timer to automatically log basic
+	counters describing the network size every minute.
+
+	* Stat/commands.php: Added commands list.
+
+	* Stat/globals.php: Added service global list.
+
+	* Stat/ss.php: Added statistics service definition. This service will
+	constantly monitor what is happening on the network and update a
+	database copy of the user list, channel list, server list, and summary
+	data. This is meant to be used in web-based service management
+	environments (another upcoming project). This service is nowhere near
+	finished, but the basics work well.
+
+Brian Cline	<brian@ircplanet.net>	2007-01-07
+	
+	* Core/core_globals.php: Increment revision count.
+	
+	* Operator/globals.php: Increment revision count.
+
+Brian Cline	<brian@ircplanet.net>	2007-01-07
+
+	* Core/p10.php: Add numeric replies for client-side /whois responses. Also
+	cleaned up several minor spacing issues.
+	
+	* Core/channel.php: Add an is_secret member to return whether or not the
+	channel is +s.
+	
+	* Core/p10/handle_W.php: Added remote /whois replies to the core. These
+	mostly follow the same rules as ircu-based /whoises with regard to
+	user host-hiding and channel lists for services and regular users.
+	Since I do not like ircu's "head-in-sand" defines, you will have to hack
+	up handle_W.php if you need to hide additional information through this
+	remote whois reply. However, keep in mind that if you have remote /whoises
+	disabled on all your ircu servers, users will not be able to send whois 
+	requests to this service and making changes to this file in order to hide
+	whois info from them will not be necessary.
+	
+	* Core/user.php: Add last_spoke variable and corresponding get_idle_time 
+	function to keep track of the last time a user has spoken. It is only
+	updated inside of the Bot child class, so this is only used for remote
+	whois replies about bots running on this server. Also added is_service
+	function to return whether this user has +k, is_deaf() to return whether
+	this user has +d, and is_local() to return if this user is on this server.
+	And finally, fixed a bug that allowed a channel to be added to this user's
+	channel list more than once.
+	
+	* Core/bot.php: Updated message() and messagef() functions to update the
+	bot's last_spoke timestamp. Currently only used for whois replies about
+	the bot.
+	
+	* Operator/p10/handle_A.php: Disable needless reporting of user away 
+	status.
+	
+	* Operator/p10/handle_M.php: Disable reporting of channel mode changes.
+	This can obviously cause a substantial amount of unnecessary log channel
+	traffic on even smaller sized networks.
+
+Brian Cline	<brian@ircplanet.net>	2006-12-20
+
+	* Channel/globals.php: Incremented revision.
+
+Brian Cline	<brian@ircplanet.net>	2006-12-20
+
+	* Channel/db_channel.php: Delete channel bans whenever a channel is
+	deleted. This fixes a startup bug where CS would die with a message related
+	to "call to method add_ban on a non-object" when loading channel bans from
+	the database for channels that had been delchan'ed or expired in the past.
+
+	* Channel/cs.php: Added error checking for the above bug. A message will be
+	logged if we come across any channel ban for a channel that does not exist.
+
+Brian Cline	<brian@ircplanet.net>	2006-12-18
+
+	* Channel/commands/register.php: Use new cs.ini constant for the maximum
+	number of channels a user can register.
+
+	* Channel/timers/expire_channels.php: Added timer code to automatically
+	unregister channels where all owners have been absent for X days
+	(configurable in cs.ini). By default, the timer runs every 5 minutes.
+
+	* Channel/config.inc.php: Remove old constant for maximum registration
+	count since it has moved to cs.ini.
+	
+	* Channel/cs.ini: Added value for maximum number of days a channel can be
+	inactive (owner inactivity) before it is purged. Also added value for the
+	maximum number of channels users are allowed to register.
+
+	* Channel/globals.php: Incremented revision.
+
+	* Channel/cs.php: Added new channel inactivity timer to timer stack.
+	Removed old debug messages that are no longer necessary.
+
+	* Core/service.php: Removed old debug messages that are no longer
+	necessary.
+
+	* Core/p10/handle_J.php: Removed old debug messages that are no longer
+	necessary.
+	
+Brian Cline	<brian@ircplanet.net>	2006-11-25
+
+	* Nickname/commands/ghost.php: Added GHOST command so that users can
+	forcibly kill a ghost using their nick.
+
+	* Nickname/commands.php: Added GHOST command to command list.
+
+	* Nickname/globals.php: Incremented revision.
+	
+Brian Cline	<brian@ircplanet.net>	2006-10-28
+
+	* Nickname/p10/handle_N.php: Only enforce a nick if it's enforce setting is
+	turned on.
+
+Brian Cline	<brian@ircplanet.net>	2006-10-28
+
+	* Core/service.php: Added a kill() function to the service class. This will
+	perform a server-based kill.
+
+	* Core/p10.php: Added protocol format line for kills.
+
+	* Core/bot.php: Added a kill() function to the bot class. This will perform
+	a user-based kill.
+
+	* Channel/p10/handle_J.php: Remove old debug messages.
+
+	* Nickname/p10/handle_N.php: Added a timer line to make sure we are
+	enforcing nicks with kills.
+
+	* Nickname/timers/enforce.php: Added nick enforcement code.
+
+	* Nickname/globals.php: Added constant for the Nickserv timer directory.
+
+Brian Cline	<brian@ircplanet.net>	2006-10-21
+
+	* Channel/commands/help.php: Fix small bug where help text variables
+	were not being substituted before the text was sent out.
+
+	* Channel/cs.php: More accomodations for proper channel bursts. If we
+	receive a channel create timestamp that is smaller than the one we have
+	stored, update it accordingly.
+
+	* Channel/globals.php: Update revision count.
+
+Brian Cline	<brian@ircplanet.net>	2006-10-16
+
+	* Operator/commands/*: Added moduser, remuser, and adduser command
+	handlers.
+
+	* Operator/os.php: Modified get_user_level() to accept an integer as well
+	so we can search for access by an account ID.
+
+	* Operator/commands.php: Added lines for adduser, moduser, and remuser.
+
+Brian Cline	<brian@ircplanet.net>	2006-10-14
+
+	* Core/core_globals.php: Increment revision count.
+
+	* Core/p10.php: Add formatter for the SETTIME token.
+
+	* Core/service.php: The 'r' mode wasn't covered in clear_modes(). Also
+	fixed a bug that wasn't updating the internal copy of a channel topic
+	whenever the service set it. Modified the kick() function to allow for
+	either a single numeric of a user to kick, or an array with multiple users.
+
+	* Core/channel.php: Added get_op_list(), get_voice_list(), and
+	get_user_list() to return an array of numerics that are ops, voices, or all
+	channel users, respectively.
+
+	* Core/user.php: Added get_signon_ts() to return the user's signon
+	timestamp, and get_channel_list() to return an array of channel names that
+	the user is joined to.
+
+	* Core/stringutils.php: Added a standard get_date() function to convert a
+	timestamp to a readable date/time in various places.
+
+	* Operator/commands.php: Rearranged command list by level. Also added
+	command lines for whois, whoison, settime, and clearchan.
+
+	* Operator/commands/whois.php: Added WHOIS command to return information
+	about a signed-on user.
+
+	* Operator/commands/settime.php: Added SETTIME command to allow operator
+	services to send out a network-wide timestamp so that all servers have the
+	correct time.
+
+	* Operator/commands/clearchan.php: Added CLEARCHAN command to allow opers
+	to clear a channel's modes, deop all its users, devoice all its users,
+	clear all its bans, kick all its users, or gline all its users. In cases
+	where an oper requests to kick or gline all channel users, the service will
+	make sure not to kick/gline the oper requesting the clearchan if they are
+	on the channel at the time. It also will not perform actions on any service
+	bots.
+
+	* Operator/commands/whoison.php: Added WHOISON command to allow opers to
+	see who is on a channel at any given time. The list is sorted
+	alphabetically and includes @ and + characters to indicate op/voice status
+	for users on the channel.
+
+Brian Cline <brian@ircplanet.net>	2006-10-13
+
+	* Core/bot.php: Make various adjustments to ensure that we send the proper
+	timestmap with a channel mode change, thus avoiding any messy HACK(2)'s.
+	
+	* Operator/commands/*: Added chanlist and scan commands.
+	
+	* Operator/commands.php: Added chanlist and scan commands.
+
+	* Operator/commands/clearmodes.php: Mode change should go through as
+	server, not bot.
+
+Brian Cline	<brian@ircplanet.net>	2006-10-09
+
+	* Initial subversion import.
+
